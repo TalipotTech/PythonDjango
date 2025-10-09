@@ -6,6 +6,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 
 from django.http import HttpResponse
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required, user_passes_test
 
 def now_debug(request):
     return HttpResponse(f"server_now={timezone.now()}")
@@ -203,6 +204,12 @@ def submit_review(request):
             return redirect('thank_you')
 
     return render(request, 'survey/submit_review.html', {'attendee': attendee})
+def is_staff_user(user):
+    return user.is_authenticated and user.is_staff
+
+
+@login_required
+@user_passes_test(is_staff_user)
 def admin_dashboard(request):
     attendees = Attendee.objects.all()
     data = []
@@ -224,3 +231,11 @@ def admin_dashboard(request):
         })
 
     return render(request, 'survey/admin_dashboard.html', {'data': data})
+
+
+@login_required
+def post_login(request):
+    # Redirect users based on role after successful login.
+    if request.user.is_staff:
+        return redirect('admin_dashboard')
+    return redirect('home')

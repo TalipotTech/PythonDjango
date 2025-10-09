@@ -123,3 +123,13 @@ STATICFILES_DIRS = [BASE_DIR / "survey" / "static"]
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Authentication redirects
+# When a user tries to access a protected page, send them here to log in
+LOGIN_URL = '/login/'
+
+# After login, redirect to a small view that routes by role (admin vs user)
+LOGIN_REDIRECT_URL = '/post-login/'
+
+# After logout, send users to home
+LOGOUT_REDIRECT_URL = '/'

@@ -8,6 +8,7 @@ urlpatterns = [
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('submit-review/', views.submit_review, name='submit_review'),
      path('now_debug/', views.now_debug, name='now_debug'),
+    path('post-login/', views.post_login, name='post_login'),
 
 
 ]
