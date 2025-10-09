@@ -21,6 +21,8 @@ class Attendee(models.Model):
     place = models.CharField(max_length=100)
     class_session = models.ForeignKey(ClassSession, on_delete=models.CASCADE)
     has_submitted = models.BooleanField(default=False)
+    # Store Django-style hashed password for student login
+    password = models.CharField(max_length=128, blank=True)
 
     def __str__(self):
         return f"{self.name} - {self.class_session.title}"

@@ -7,6 +7,8 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.hashers import check_password
+from .forms import AttendeeForm, StudentLoginForm
 
 def now_debug(request):
     return HttpResponse(f"server_now={timezone.now()}")
@@ -17,31 +19,17 @@ def home(request):
     return render(request, 'survey/home.html')
 
 def submit_response(request):
+    # Student signup/registration (creates an attendee with password)
     if request.method == 'POST':
-        name = request.POST.get('name')
-        email = request.POST.get('email')
-        phone = request.POST.get('phone')
-        age = request.POST.get('age')
-        place = request.POST.get('place')
-        class_session_id = request.POST.get('class_session')
-
-        if Attendee.objects.filter(email=email, class_session_id=class_session_id).exists():
-            return render(request, 'survey/already_submitted.html')
-
-        attendee = Attendee.objects.create(
-            name=name,
-            email=email,
-            phone=phone,
-            age=age,
-            place=place,
-            class_session_id=class_session_id
-        )
-
-        request.session['attendee_id'] = attendee.id
-        request.session['class_session_id'] = class_session_id
-        request.session['class_title'] = attendee.class_session.title
-
-        return redirect('quiz')
+        form = AttendeeForm(request.POST)
+        if form.is_valid():
+            attendee = form.save()
+            request.session['attendee_id'] = attendee.id
+            request.session['class_session_id'] = attendee.class_session_id
+            request.session['class_title'] = attendee.class_session.title
+            return redirect('quiz')
+    else:
+        form = AttendeeForm()
 
     sessions = ClassSession.objects.all()
     sessions_json = json.dumps([
@@ -56,8 +44,34 @@ def submit_response(request):
 
     return render(request, 'survey/submit.html', {
         'sessions': sessions,
-        'sessions_json': sessions_json
+        'sessions_json': sessions_json,
+        'form': form,
     })
+
+
+def student_login(request):
+    # Students log in with name + password + class session
+    if request.method == 'POST':
+        form = StudentLoginForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data['name']
+            password = form.cleaned_data['password']
+            class_session = form.cleaned_data['class_session']
+            try:
+                attendee = Attendee.objects.get(name=name, class_session=class_session)
+                if attendee.password and check_password(password, attendee.password):
+                    request.session['attendee_id'] = attendee.id
+                    request.session['class_session_id'] = class_session.id
+                    request.session['class_title'] = class_session.title
+                    return redirect('quiz')
+            except Attendee.DoesNotExist:
+                pass
+            # Invalid credentials
+            return render(request, 'survey/student_login.html', {'form': form, 'error': 'Invalid credentials'})
+    else:
+        form = StudentLoginForm()
+
+    return render(request, 'survey/student_login.html', {'form': form})
 
 
 
@@ -165,12 +179,10 @@ def submit_quiz(request):
 
         for question in questions:
             selected = int(request.POST.get(f'question_{question.id}', 0))
-            is_correct = selected == question.correct_option
             Response.objects.create(
                 attendee=attendee,
                 question=question,
-                selected_option=selected,
-                is_correct=is_correct
+                selected_option=selected
             )
 
         return redirect('thank_you')
@@ -211,26 +223,26 @@ def is_staff_user(user):
 @login_required
 @user_passes_test(is_staff_user)
 def admin_dashboard(request):
-    attendees = Attendee.objects.all()
-    data = []
+    attendees_qs = Attendee.objects.select_related('class_session').all()
+    attendees = []
 
-    for attendee in attendees:
-        responses = Response.objects.filter(attendee=attendee)
-        total_score = responses.filter(is_correct=True).count()
-        answers = [{
-            'question': r.question.text,
-            'selected': r.selected_option,
-            'correct': r.question.correct_option,
-            'is_correct': r.is_correct
-        } for r in responses]
+    for attendee in attendees_qs:
+        responses = list(Response.objects.select_related('question').filter(attendee=attendee))
+        total_attempted = len(responses)
+        total_correct = sum(1 for r in responses if r.is_correct)
+        score_percent = round((total_correct / total_attempted) * 100, 2) if total_attempted else 0
 
-        data.append({
-            'attendee': attendee,
-            'score': total_score,
-            'answers': answers
+        attendees.append({
+            'name': attendee.name,
+            'email': attendee.email,
+            'class_session': attendee.class_session,
+            'responses': responses,
+            'total_attempted': total_attempted,
+            'total_correct': total_correct,
+            'score_percent': score_percent,
         })
 
-    return render(request, 'survey/admin_dashboard.html', {'data': data})
+    return render(request, 'survey/admin_dashboard.html', {'attendees': attendees})
 
 
 @login_required

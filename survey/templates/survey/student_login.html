@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Login{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+  <h2>Student Login</h2>
+
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-row">
+      <label for="id_name">Name</label>
+      {{ form.name }}
+    </div>
+    <div class="form-row">
+      <label for="id_password">Password</label>
+      {{ form.password }}
+    </div>
+    <div class="form-row">
+      <label for="id_class_session">Class Session</label>
+      {{ form.class_session }}
+    </div>
+    <button type="submit" class="button">Login</button>
+  </form>
+</div>
+{% endblock %}

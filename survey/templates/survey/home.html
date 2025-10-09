@@ -11,17 +11,39 @@
 
 <div class="login-buttons">
   <a href="{% url 'submit_response' %}" class="login-button login">
-    <i class="fas fa-user-graduate"></i> Login
+    <i class="fas fa-user-graduate"></i> Register (Student)
+  </a>
+
+  <a href="{% url 'student_login' %}" class="login-button login">
+    <i class="fas fa-sign-in-alt"></i> Student Login
   </a>
 
 <a href="{% url 'submit_review' %}" class="login-button login">
   <i class="fas fa-comment-dots"></i> Submit Review
 </a> 
+
+  {% if request.user.is_authenticated %}
+    {% if request.user.is_staff %}
+      <a href="{% url 'admin_dashboard' %}" class="login-button admin-login">
+        🛡️ Admin Dashboard
+      </a>
+      <a href="{% url 'logout' %}" class="login-button">
+        🚪 Logout
+      </a>
+    {% else %}
+      <a href="{% url 'logout' %}" class="login-button">
+        🚪 Logout
+      </a>
+    {% endif %}
+  {% else %}
+    <a href="{% url 'login' %}" class="login-button admin-login">
+      🛡️ Admin Login
+    </a>
+  {% endif %}
+
 </div>
 
-    <!-- <a href="{% url 'admin:login' %}" class="login-button admin-login">
-      <i class="fas fa-user-shield"></i> Admin Login -->
-    </a>
+    
   </div>
 </div>
 {% endblock %} 
