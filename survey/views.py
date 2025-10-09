@@ -59,11 +59,24 @@ def student_login(request):
             class_session = form.cleaned_data['class_session']
             try:
                 attendee = Attendee.objects.get(name=name, class_session=class_session)
-                if attendee.password and check_password(password, attendee.password):
-                    request.session['attendee_id'] = attendee.id
-                    request.session['class_session_id'] = class_session.id
-                    request.session['class_title'] = class_session.title
-                    return redirect('quiz')
+                if attendee.password:
+                    # Handle hashed passwords normally
+                    if attendee.password.startswith('pbkdf2_') or attendee.password.startswith('argon2$') or attendee.password.startswith('bcrypt') or attendee.password.startswith('sha1$'):
+                        if check_password(password, attendee.password):
+                            request.session['attendee_id'] = attendee.id
+                            request.session['class_session_id'] = class_session.id
+                            request.session['class_title'] = class_session.title
+                            return redirect('quiz')
+                    else:
+                        # Legacy plaintext stored; compare directly and upgrade to hashed on success
+                        if attendee.password == password:
+                            from django.contrib.auth.hashers import make_password
+                            attendee.password = make_password(password)
+                            attendee.save(update_fields=['password'])
+                            request.session['attendee_id'] = attendee.id
+                            request.session['class_session_id'] = class_session.id
+                            request.session['class_title'] = class_session.title
+                            return redirect('quiz')
             except Attendee.DoesNotExist:
                 pass
             # Invalid credentials

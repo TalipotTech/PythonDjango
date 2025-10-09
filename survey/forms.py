@@ -2,7 +2,6 @@ from django import forms
 import re
 from .models import Attendee, Question, Review
 from .models import ClassSession
-from django import forms
 from django.contrib.auth.hashers import make_password
 
 
@@ -31,9 +30,18 @@ class AttendeeForm(forms.ModelForm):
         pwd = self.cleaned_data.get('password')
         if not pwd or len(pwd) < 6:
             raise forms.ValidationError("Password must be at least 6 characters long.")
-        # Hash the password before saving to model instance
-        self.instance.password = make_password(pwd)
+        # Return raw here; we'll hash in save() to avoid being overwritten by ModelForm internals
         return pwd
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        # Always hash the password before saving to DB
+        raw_pwd = self.cleaned_data.get('password')
+        if raw_pwd:
+            instance.password = make_password(raw_pwd)
+        if commit:
+            instance.save()
+        return instance
 
 
 class StudentLoginForm(forms.Form):
