@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="message-container">
+  <h2>🚫 Already Submitted</h2>
+  <p>You have already submitted your responses for the <strong>{{ request.session.class_title }}</strong> session.</p>
+  <p>Each attendee is allowed only one submission per class.</p>
+
+  <div class="button-group">
+    <a href="{% url 'home' %}" class="button">Back to Home</a>
+    <a href="{% url 'submit_review' %}" class="button">Leave a Review</a>
+  </div>
+</div>
+{% endblock %}

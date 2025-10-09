@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="message-container">
+<h2>{{ message }}</h2>
+<p>The quiz window for <strong>{{ class_session.title }}</strong> is not currently active.</p>
+<p>This session is available from {{ start|date:"M d, Y h:i A" }} to {{ end|date:"M d, Y h:i A" }}.</p>
+<a href="{% url 'home' %}">Back to Home</a>
+
+<!-- 
+  <div class="button-group">
+    <a href="{% url 'home' %}" class="button">Back to Home</a> -->
+  </div>
+</div>
+{% endblock %}

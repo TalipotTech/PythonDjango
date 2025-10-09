@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="thank-you-container">
+  <h2>✅ Thank You!</h2>
+  <p>Your responses have been submitted successfully.</p>
+  <p>We appreciate your participation in the {{ request.session.class_title }} session.</p>
+
+  <div class="button-group">
+    <a href="{% url 'home' %}" class="button">Back to Home</a>
+    <a href="{% url 'submit_review' %}" class="button">Leave a Review</a>
+  </div>
+</div>
+{% endblock %}

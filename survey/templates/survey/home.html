@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+<div class="home-wrapper">
+  <h1 class="home-title">🎓 Welcome to the Course Selection Portal</h1>
+  <p class="home-description">Choose your class, take the quiz, and share your feedback. This portal supports multiple sessions and secure submissions.</p>
+
+<div class="login-buttons">
+  <a href="{% url 'submit_response' %}" class="login-button login">
+    <i class="fas fa-user-graduate"></i> Login
+  </a>
+
+<a href="{% url 'submit_review' %}" class="login-button login">
+  <i class="fas fa-comment-dots"></i> Submit Review
+</a> 
+</div>
+
+    <!-- <a href="{% url 'admin:login' %}" class="login-button admin-login">
+      <i class="fas fa-user-shield"></i> Admin Login -->
+    </a>
+  </div>
+</div>
+{% endblock %} 

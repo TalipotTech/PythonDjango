@@ -1,0 +1,73 @@
+<form method="post">
+  {% csrf_token %}
+
+  <label>Name:</label>
+  <input type="text" name="name" required placeholder="Your full name"><br><br>
+
+  <label>Phone:</label>
+  <input type="text" name="phone" required pattern="\d{10}" maxlength="10"
+         placeholder="10-digit phone number"
+         title="Phone number must be exactly 10 digits"><br><br>
+
+  <label>Email:</label>
+  <input type="email" name="email" required placeholder="your@email.com"><br><br>
+
+  <label>Age:</label>
+  <input type="number" name="age" required min="1" max="120" placeholder="Your age"><br><br>
+
+  <label>Place:</label>
+  <input type="text" name="place" required placeholder="Your location"><br><br>
+
+  <label>Select Class Title:</label>
+  <select name="class_session" id="class_session" onchange="updateSessionDetails()" required>
+    <option value="">-- Select --</option>
+    {% for session in sessions %}
+      <option value="{{ session.id }}">{{ session.title }}</option>
+    {% endfor %}
+  </select><br><br>
+
+  <label>Teacher:</label>
+  <input type="text" id="teacher" readonly><br><br>
+
+  <label>Time:</label>
+  <input type="text" id="time" readonly><br><br>
+
+  <button type="submit">Start Quiz</button>
+</form>
+
+
+<script id="session-data" type="application/json">
+    {{ sessions_json|safe }}
+</script>
+
+<script>
+    function updateSessionDetails() {
+        const raw = document.getElementById('session-data').textContent;
+        const sessions = JSON.parse(raw);
+
+        const selectedId = document.getElementById('class_session').value;
+        const teacherField = document.getElementById('teacher');
+        const timeField = document.getElementById('time');
+
+        const session = sessions.find(s => s.id == selectedId);
+        if (session) {
+            teacherField.value = session.teacher;
+
+            const start = new Date(session.start_time);
+            const end = new Date(session.end_time);
+
+            const formatTime = t => {
+                let hours = t.getHours();
+                let minutes = t.getMinutes();
+                let ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12 || 12;
+                return `${hours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+            };
+
+            timeField.value = `${formatTime(start)} – ${formatTime(end)}`;
+        } else {
+            teacherField.value = '';
+            timeField.value = '';
+        }
+    }
+</script>

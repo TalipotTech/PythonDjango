@@ -1,0 +1,11 @@
+
+{% block content %}
+  <h2>Submit Your Review</h2>
+
+<form method="post">
+  {% csrf_token %}
+  <textarea name="content" rows="5" cols="40" placeholder="Write your feedback here..." required></textarea>
+  <br>
+  <button type="submit">Submit Review</button>
+</form>
+{% endblock %}

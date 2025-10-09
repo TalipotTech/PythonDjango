@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-container">
+  <h2>📊 Admin Dashboard</h2>
+
+  {% for attendee in attendees %}
+    <div class="attendee-card">
+      <h3>{{ attendee.name }} ({{ attendee.class_session.title }})</h3>
+      <p><strong>Email:</strong> {{ attendee.email }}</p>
+      <p><strong>Score:</strong> {{ attendee.total_correct }} / {{ attendee.total_attempted }} ({{ attendee.score_percent }}%)</p>
+
+      <table class="response-table">
+        <thead>
+          <tr>
+            <th>Question</th>
+            <th>Selected Answer</th>
+            <th>Correct?</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for response in attendee.responses %}
+            <tr>
+              <td>{{ response.question.text }}</td>
+              <td>
+                {% if response.selected_option == 1 %}{{ response.question.option1 }}
+                {% elif response.selected_option == 2 %}{{ response.question.option2 }}
+                {% elif response.selected_option == 3 %}{{ response.question.option3 }}
+                {% elif response.selected_option == 4 %}{{ response.question.option4 }}
+                {% else %}Invalid{% endif %}
+              </td>
+              <td>
+                {% if response.selected_option == response.question.correct_option %}
+                  ✅
+                {% else %}
+                  ❌
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% empty %}
+    <p>No attendees have submitted responses yet.</p>
+  {% endfor %}
+</div>
+{% endblock %}
