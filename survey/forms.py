@@ -1,4 +1,5 @@
 from django import forms
+import re
 from .models import Attendee, Question, Review
 from .models import ClassSession
 from django import forms
