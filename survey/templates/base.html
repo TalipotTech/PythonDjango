@@ -10,20 +10,37 @@
     <header>
         <div class="app-name">Survey App</div>
         <nav>
-            <a href="{% url 'home' %}" title="Home">🏠</a>
-            <a href="javascript:history.back()" title="Back">🔙</a>
-            {% if request.user.is_authenticated %}
-                {% if request.user.is_staff %}
-                  <a href="{% url 'admin_dashboard' %}" title="Dashboard">Dashboard</a>
-                {% endif %}
-                <a href="{% url 'logout' %}" title="Logout">Logout</a>
+            <a href="{% url 'home' %}" title="Home">🏠 Home</a>
+            
+            {% if request.session.is_admin %}
+                <!-- Admin Navigation -->
+                <a href="{% url 'admin_dashboard' %}" title="Dashboard">📊 Dashboard</a>
+                <a href="{% url 'admin_logout' %}" title="Logout">� Logout (Admin)</a>
+            {% elif request.session.attendee_id %}
+                <!-- Student Navigation -->
+                <a href="{% url 'student_dashboard' %}" title="My Dashboard">📚 My Dashboard</a>
+                <a href="{% url 'quiz' %}" title="Quiz">📝 Quiz</a>
+                <a href="{% url 'student_logout' %}" title="Logout">🚪 Logout</a>
             {% else %}
-                <a href="{% url 'login' %}" title="Login">Login</a>
+                <!-- Guest Navigation -->
+                <a href="{% url 'student_login' %}" title="Student Login">👤 Student Login</a>
+                <a href="{% url 'admin_login' %}" title="Admin Login">🔐 Admin Login</a>
+                <a href="{% url 'submit_response' %}" title="Register">📝 Register</a>
             {% endif %}
         </nav>
     </header>
 
     <main>
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
         {% block content %}{% endblock %}
     </main>
 

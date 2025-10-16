@@ -1,0 +1,493 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Question{% endblock %}
+
+{% block content %}
+<div class="question-form-container">
+  <div class="form-header">
+    <h1>✏️ Edit Question</h1>
+    <p class="form-subtitle">Update question for <strong>{{ session.title }}</strong></p>
+    <a href="{% url 'admin_session_view' session.id %}" class="btn btn-secondary-sm">← Back to Session</a>
+  </div>
+
+  <div class="form-card">
+    <form method="POST" id="questionForm">
+      {% csrf_token %}
+      
+      <div class="form-group">
+        <label for="question_type">
+          <span class="label-icon">📋</span>
+          Question Type <span class="required">*</span>
+        </label>
+        <select name="question_type" id="question_type" class="form-select" onchange="toggleQuestionType()" required>
+          <option value="multiple_choice" {% if question.question_type == 'multiple_choice' %}selected{% endif %}>Multiple Choice</option>
+          <option value="text_response" {% if question.question_type == 'text_response' %}selected{% endif %}>Text Response (Essay)</option>
+        </select>
+        <small class="help-text">Choose between multiple choice or open-ended text question</small>
+      </div>
+      
+      <div class="form-group">
+        <label for="text">
+          <span class="label-icon">❓</span>
+          Question Text <span class="required">*</span>
+        </label>
+        <textarea 
+          name="text" 
+          id="text"
+          rows="4" 
+          class="form-textarea"
+          required
+          minlength="10"
+        >{{ question.text }}</textarea>
+        <small class="help-text">Write a clear and concise question</small>
+      </div>
+
+      <div class="options-section" id="optionsSection">
+        <h3>📝 Answer Options</h3>
+        
+        <div class="form-group">
+          <label for="option1">
+            <span class="option-number">1</span>
+            Option 1 <span class="required">*</span>
+          </label>
+          <input 
+            type="text" 
+            name="option1" 
+            id="option1"
+            class="form-input"
+            value="{{ question.option1 }}"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="option2">
+            <span class="option-number">2</span>
+            Option 2 <span class="required">*</span>
+          </label>
+          <input 
+            type="text" 
+            name="option2" 
+            id="option2"
+            class="form-input"
+            value="{{ question.option2 }}"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="option3">
+            <span class="option-number">3</span>
+            Option 3 <span class="required">*</span>
+          </label>
+          <input 
+            type="text" 
+            name="option3" 
+            id="option3"
+            class="form-input"
+            value="{{ question.option3 }}"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="option4">
+            <span class="option-number">4</span>
+            Option 4 <span class="required">*</span>
+          </label>
+          <input 
+            type="text" 
+            name="option4" 
+            id="option4"
+            class="form-input"
+            value="{{ question.option4 }}"
+            required
+          >
+        </div>
+      </div>
+
+      <div class="correct-answer-section" id="correctAnswerSection">
+        <h3>✅ Correct Answer</h3>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="correct_option" value="1" {% if question.correct_option == 1 %}checked{% endif %} id="correct_1">
+            <span class="radio-text">Option 1</span>
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="correct_option" value="2" {% if question.correct_option == 2 %}checked{% endif %} id="correct_2">
+            <span class="radio-text">Option 2</span>
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="correct_option" value="3" {% if question.correct_option == 3 %}checked{% endif %} id="correct_3">
+            <span class="radio-text">Option 3</span>
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="correct_option" value="4" {% if question.correct_option == 4 %}checked{% endif %} id="correct_4">
+            <span class="radio-text">Option 4</span>
+          </label>
+        </div>
+        <small class="help-text">Select which option is the correct answer</small>
+      </div>
+      
+      <div class="text-response-info" id="textResponseInfo" style="display: none;">
+        <div class="info-box">
+          <span class="info-icon">💡</span>
+          <div>
+            <strong>Text Response Question</strong>
+            <p>Students will be able to write their answer in their own words. This type of question doesn't have correct/incorrect answers.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-submit-question">
+          <span class="btn-icon">💾</span>
+          Save Changes
+        </button>
+        <a href="{% url 'admin_session_view' session.id %}" class="btn-cancel">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function toggleQuestionType() {
+  const questionType = document.getElementById('question_type').value;
+  const optionsSection = document.getElementById('optionsSection');
+  const correctAnswerSection = document.getElementById('correctAnswerSection');
+  const textResponseInfo = document.getElementById('textResponseInfo');
+  
+  // Get all option inputs and radio buttons
+  const optionInputs = ['option1', 'option2', 'option3', 'option4'].map(id => document.getElementById(id));
+  const correctRadios = ['correct_1', 'correct_2', 'correct_3', 'correct_4'].map(id => document.getElementById(id));
+  
+  if (questionType === 'text_response') {
+    // Hide multiple choice sections
+    optionsSection.style.display = 'none';
+    correctAnswerSection.style.display = 'none';
+    textResponseInfo.style.display = 'block';
+    
+    // Remove required attribute from options and radios
+    optionInputs.forEach(input => {
+      input.required = false;
+    });
+    correctRadios.forEach(radio => {
+      radio.required = false;
+    });
+  } else {
+    // Show multiple choice sections
+    optionsSection.style.display = 'block';
+    correctAnswerSection.style.display = 'block';
+    textResponseInfo.style.display = 'none';
+    
+    // Add required attribute to options and radios
+    optionInputs.forEach(input => input.required = true);
+    correctRadios.forEach(radio => radio.required = true);
+  }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', toggleQuestionType);
+</script>
+
+<style>
+.question-form-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.form-header h1 {
+  font-size: 2.5rem;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+}
+
+.form-subtitle {
+  font-size: 1.1rem;
+  color: #6b7280;
+  margin-bottom: 1rem;
+}
+
+.btn-secondary-sm {
+  display: inline-block;
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary-sm:hover {
+  background: #f0f4ff;
+  transform: translateY(-2px);
+}
+
+.form-card {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  margin-bottom: 2rem;
+}
+
+.form-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: #374151;
+  margin-bottom: 0.75rem;
+}
+
+.label-icon {
+  font-size: 1.3rem;
+}
+
+.option-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.required {
+  color: #ef4444;
+  font-weight: 700;
+}
+
+.form-textarea {
+  width: 100%;
+  padding: 1rem;
+  border: 3px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  line-height: 1.6;
+  transition: all 0.3s ease;
+  resize: vertical;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 3px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-select {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 3px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 1rem;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.form-textarea:focus,
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.help-text {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.options-section,
+.correct-answer-section {
+  background: #f9fafb;
+  padding: 1.5rem;
+  border-radius: 15px;
+  margin: 2rem 0;
+}
+
+.options-section h3,
+.correct-answer-section h3 {
+  margin: 0 0 1.5rem 0;
+  color: #1f2937;
+  font-size: 1.3rem;
+}
+
+.radio-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  background: white;
+  border: 3px solid #e5e7eb;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.radio-label:hover {
+  border-color: #667eea;
+  background: #f0f4ff;
+}
+
+.radio-label input[type="radio"] {
+  margin-right: 0.75rem;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #667eea;
+}
+
+.radio-label:has(input[type="radio"]:checked) {
+  border-color: #10b981;
+  background: #d1fae5;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
+
+.radio-text {
+  font-weight: 600;
+  color: #374151;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.btn-submit-question {
+  flex: 1;
+  padding: 1.25rem 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-submit-question:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 25px rgba(102, 126, 234, 0.5);
+}
+
+.btn-cancel {
+  flex: 1;
+  padding: 1.25rem 2rem;
+  background: white;
+  color: #6b7280;
+  border: 3px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-cancel:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  transform: translateY(-3px);
+}
+
+.btn-icon {
+  font-size: 1.2rem;
+}
+
+.text-response-info {
+  margin: 2rem 0;
+}
+
+.info-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+  padding: 1.5rem;
+  border-radius: 15px;
+  border-left: 5px solid #667eea;
+}
+
+.info-icon {
+  font-size: 2rem;
+}
+
+.info-box strong {
+  display: block;
+  color: #1f2937;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.info-box p {
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .question-form-container {
+    margin: 1rem auto;
+  }
+
+  .form-card {
+    padding: 1.5rem;
+  }
+
+  .form-header h1 {
+    font-size: 2rem;
+  }
+
+  .radio-group {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+}
+</style>
+{% endblock %}

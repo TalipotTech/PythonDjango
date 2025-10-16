@@ -1,0 +1,450 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<div class="student-dashboard-container">
+  <div class="student-header">
+    <h1>👋 Welcome, {{ student_name }}!</h1>
+    <p>Your personalized learning dashboard</p>
+  </div>
+
+  <!-- Student Info Card -->
+  <div class="info-section">
+    <div class="info-card">
+      <h3>📋 Your Information</h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Name:</span>
+          <span class="info-value">{{ attendee.name }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Email:</span>
+          <span class="info-value">{{ attendee.email }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Phone:</span>
+          <span class="info-value">{{ attendee.phone }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Age:</span>
+          <span class="info-value">{{ attendee.age|default:"Not provided" }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Place:</span>
+          <span class="info-value">{{ attendee.place|default:"Not provided" }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Session Details -->
+    <div class="session-card">
+      <h3>📚 Your Class Session</h3>
+      <div class="session-details">
+        <div class="session-title">{{ attendee.class_session.title }}</div>
+        <div class="session-teacher">👨‍🏫 Teacher: {{ attendee.class_session.teacher }}</div>
+        <div class="session-time">
+          🕐 {{ attendee.class_session.start_time|date:"M d, Y - H:i" }} 
+          to 
+          {{ attendee.class_session.end_time|date:"H:i" }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz Status -->
+  <div class="quiz-section">
+    <h2>📝 Quiz & Responses</h2>
+    {% if attendee.has_submitted %}
+      <div class="status-card status-complete">
+        <div class="status-icon">✅</div>
+        <div class="status-content">
+          <h3>Quiz Completed!</h3>
+          <p>You have successfully submitted your responses.</p>
+          <div class="quiz-stats">
+            <div class="stat-item">
+              <strong>Total Questions:</strong> {{ total_questions }}
+            </div>
+            <div class="stat-item">
+              <strong>Your Responses:</strong> {{ total_responses }}
+            </div>
+            <div class="stat-item">
+              <strong>Correct Answers:</strong> 
+              <span class="correct-count">{{ correct_answers }}</span>
+            </div>
+            <div class="stat-item">
+              <strong>Score:</strong> 
+              <span class="score">{{ score }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="status-card status-pending">
+        <div class="status-icon">⏳</div>
+        <div class="status-content">
+          <h3>Quiz Pending</h3>
+          <p>You haven't submitted your quiz responses yet.</p>
+          <a href="{% url 'quiz' %}" class="btn btn-primary">Start Quiz Now</a>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Your Responses (if submitted) -->
+  {% if attendee.has_submitted and responses %}
+  <div class="responses-section">
+    <h2>📊 Your Answers</h2>
+    <div class="responses-list">
+      {% for response in responses %}
+      <div class="response-card {% if response.is_correct %}correct{% else %}incorrect{% endif %}">
+        <div class="question-number">Question {{ forloop.counter }}</div>
+        <div class="question-text">{{ response.question.text }}</div>
+        <div class="answer-info">
+          <div class="your-answer">
+            <strong>Your Answer:</strong> 
+            {% if response.selected_option == 1 %}{{ response.question.option1 }}
+            {% elif response.selected_option == 2 %}{{ response.question.option2 }}
+            {% elif response.selected_option == 3 %}{{ response.question.option3 }}
+            {% else %}{{ response.question.option4 }}
+            {% endif %}
+          </div>
+          {% if not response.is_correct %}
+          <div class="correct-answer">
+            <strong>Correct Answer:</strong>
+            {% if response.question.correct_option == 1 %}{{ response.question.option1 }}
+            {% elif response.question.correct_option == 2 %}{{ response.question.option2 }}
+            {% elif response.question.correct_option == 3 %}{{ response.question.option3 }}
+            {% else %}{{ response.question.option4 }}
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+        <div class="result-badge">
+          {% if response.is_correct %}
+            <span class="badge-correct">✓ Correct</span>
+          {% else %}
+            <span class="badge-incorrect">✗ Incorrect</span>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Reviews -->
+  <div class="review-section">
+    <h2>💬 Your Feedback</h2>
+    {% if has_reviewed %}
+      <div class="review-display">
+        <div class="review-header">✅ You have submitted your feedback</div>
+        <div class="review-text">{{ user_review.content }}</div>
+        <div class="review-date">Submitted on {{ user_review.submitted_at|date:"M d, Y at H:i" }}</div>
+      </div>
+    {% else %}
+      <div class="no-review">
+        <p>You haven't submitted feedback yet.</p>
+        <a href="{% url 'submit_review' %}" class="btn btn-secondary">Submit Feedback</a>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Actions -->
+  <div class="dashboard-footer">
+    <a href="{% url 'student_logout' %}" class="btn btn-danger">🚪 Logout</a>
+  </div>
+</div>
+
+<style>
+.student-dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.student-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.student-header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+}
+
+.student-header p {
+  margin: 0.5rem 0 0 0;
+  opacity: 0.9;
+}
+
+.info-section {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.info-card, .session-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.info-card h3, .session-card h3 {
+  margin: 0 0 1.5rem 0;
+  color: #1f2937;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.75rem;
+}
+
+.info-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.info-value {
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.session-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.session-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #667eea;
+}
+
+.session-teacher, .session-time {
+  color: #374151;
+  padding: 0.5rem;
+  background: #f3f4f6;
+  border-radius: 6px;
+}
+
+.quiz-section, .responses-section, .review-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.quiz-section h2, .responses-section h2, .review-section h2 {
+  margin: 0 0 1.5rem 0;
+  color: #1f2937;
+}
+
+.status-card {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  border-radius: 12px;
+  align-items: center;
+}
+
+.status-complete {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border: 2px solid #10b981;
+}
+
+.status-pending {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #f59e0b;
+}
+
+.status-icon {
+  font-size: 4rem;
+  line-height: 1;
+}
+
+.status-content h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.75rem;
+}
+
+.status-content p {
+  margin: 0 0 1rem 0;
+  color: #374151;
+}
+
+.quiz-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.stat-item {
+  padding: 0.75rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.correct-count, .score {
+  color: #10b981;
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.responses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.response-card {
+  padding: 1.5rem;
+  border-radius: 10px;
+  border-left: 5px solid;
+}
+
+.response-card.correct {
+  background: #f0fdf4;
+  border-left-color: #10b981;
+}
+
+.response-card.incorrect {
+  background: #fef2f2;
+  border-left-color: #ef4444;
+}
+
+.question-number {
+  font-weight: 700;
+  color: #667eea;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.question-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #1f2937;
+}
+
+.answer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.your-answer, .correct-answer {
+  padding: 0.75rem;
+  border-radius: 6px;
+}
+
+.your-answer {
+  background: #e0e7ff;
+}
+
+.correct-answer {
+  background: #fef3c7;
+}
+
+.result-badge {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.badge-correct {
+  background: #10b981;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.badge-incorrect {
+  background: #ef4444;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.review-display {
+  background: #f9fafb;
+  padding: 1.5rem;
+  border-radius: 10px;
+  border-left: 4px solid #667eea;
+}
+
+.review-header {
+  font-weight: 600;
+  color: #059669;
+  margin-bottom: 1rem;
+}
+
+.review-text {
+  color: #374151;
+  line-height: 1.8;
+  margin-bottom: 1rem;
+}
+
+.review-date {
+  color: #6b7280;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.no-review {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+}
+
+.dashboard-footer {
+  text-align: center;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 2px solid #e5e7eb;
+}
+
+@media (max-width: 768px) {
+  .student-dashboard-container {
+    padding: 1rem;
+  }
+
+  .info-section {
+    grid-template-columns: 1fr;
+  }
+
+  .quiz-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .student-header h1 {
+    font-size: 1.75rem;
+  }
+}
+</style>
+{% endblock %}

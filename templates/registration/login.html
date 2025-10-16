@@ -5,8 +5,9 @@
 {% block content %}
 <div class="auth-container">
   <h2>Login</h2>
+  <p class="note">This login is not used. Please use <a href="{% url 'student_login' %}">Student Login</a>.</p>
 
-  {% if form.errors %}
+  {% if form and form.errors %}
     <div class="error">Invalid username or password. Please try again.</div>
   {% endif %}
 
@@ -14,24 +15,6 @@
     <p>You must log in to access this page.</p>
   {% endif %}
 
-  <form method="post" action="{% url 'login' %}">
-    {% csrf_token %}
-
-    <div class="form-row">
-      <label for="id_username">Username</label>
-      <input id="id_username" type="text" name="username" required autofocus>
-    </div>
-
-    <div class="form-row">
-      <label for="id_password">Password</label>
-      <input id="id_password" type="password" name="password" required>
-    </div>
-
-    {% if next %}
-      <input type="hidden" name="next" value="{{ next }}">
-    {% endif %}
-
-    <button type="submit" class="button">Login</button>
-  </form>
+  <p><a class="button" href="{% url 'student_login' %}">Go to Student Login</a></p>
 </div>
 {% endblock %}

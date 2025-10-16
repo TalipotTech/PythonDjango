@@ -1,14 +1,137 @@
 {% extends 'base.html' %}
 
+{% block title %}Quiz Already Submitted{% endblock %}
+
 {% block content %}
 <div class="message-container">
-  <h2>🚫 Already Submitted</h2>
-  <p>You have already submitted your responses for the <strong>{{ request.session.class_title }}</strong> session.</p>
-  <p>Each attendee is allowed only one submission per class.</p>
+  <div class="message-icon">🚫</div>
+  <h2 class="message-title">Quiz Already Submitted</h2>
+  
+  {% if message %}
+    <p class="message-text">{{ message }}</p>
+  {% else %}
+    <p class="message-text">You have already submitted your responses for <strong>{{ class_session.title|default:request.session.class_title }}</strong>.</p>
+  {% endif %}
+  
+  <div class="info-box">
+    <p><strong>⚠️ Important:</strong> Each student is allowed only <strong>ONE attempt</strong> per quiz to ensure fairness and prevent copying answers.</p>
+    <p>Your responses have been recorded and cannot be changed.</p>
+  </div>
 
   <div class="button-group">
-    <a href="{% url 'home' %}" class="button">Back to Home</a>
-    <a href="{% url 'submit_review' %}" class="button">Leave a Review</a>
+    <a href="{% url 'student_dashboard' %}" class="button button-primary">
+      <span class="btn-icon">📊</span> View Your Results
+    </a>
+    <a href="{% url 'session_home' %}" class="button button-secondary">
+      <span class="btn-icon">🏠</span> Back to Session Home
+    </a>
+    <a href="{% url 'submit_review' %}" class="button button-secondary">
+      <span class="btn-icon">💬</span> Leave Feedback
+    </a>
   </div>
 </div>
+
+<style>
+.message-container {
+  max-width: 600px;
+  margin: 80px auto;
+  padding: 40px;
+  text-align: center;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.message-icon {
+  font-size: 5rem;
+  margin-bottom: 20px;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.message-title {
+  color: #d32f2f;
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+}
+
+.message-text {
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 15px;
+  line-height: 1.6;
+}
+
+.info-box {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  border-radius: 10px;
+  padding: 20px;
+  margin: 30px 0;
+  text-align: left;
+}
+
+.info-box p {
+  margin: 10px 0;
+  color: #856404;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.button {
+  display: inline-block;
+  padding: 15px 30px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+}
+
+.button-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.button-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.button-secondary {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+}
+
+.button-secondary:hover {
+  background: #667eea;
+  color: white;
+}
+
+.btn-icon {
+  margin-right: 8px;
+}
+
+@media (max-width: 768px) {
+  .message-container {
+    margin: 40px 20px;
+    padding: 30px 20px;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+}
+</style>
 {% endblock %}

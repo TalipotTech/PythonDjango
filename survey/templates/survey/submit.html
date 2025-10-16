@@ -1,81 +1,348 @@
-<form method="post">
-  {% csrf_token %}
+{% extends 'base.html' %}
 
-  {% if form %}
-    {{ form.as_p }}
-  {% else %}
-    <label>Name:</label>
-    <input type="text" name="name" required placeholder="Your full name"><br><br>
+{% block title %}Student Registration{% endblock %}
 
-    <label>Phone:</label>
-    <input type="text" name="phone" required pattern="\d{10}" maxlength="10"
-           placeholder="10-digit phone number"
-           title="Phone number must be exactly 10 digits"><br><br>
+{% block content %}
+<div class="registration-container">
+  <h2 class="form-title">📝 Student Registration</h2>
+  <p class="form-subtitle">Fill in your details to register for the quiz</p>
 
-    <label>Email:</label>
-    <input type="email" name="email" required placeholder="your@email.com"><br><br>
+  <form method="post" class="registration-form" id="registration-form">
+    {% csrf_token %}
 
-    <label>Age:</label>
-    <input type="number" name="age" required min="1" max="120" placeholder="Your age"><br><br>
-
-    <label>Place:</label>
-    <input type="text" name="place" required placeholder="Your location"><br><br>
-
-    <label>Select Class Title:</label>
-    <select name="class_session" id="class_session" onchange="updateSessionDetails()" required>
-      <option value="">-- Select --</option>
-      {% for session in sessions %}
-        <option value="{{ session.id }}">{{ session.title }}</option>
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
       {% endfor %}
-    </select><br><br>
+    {% endif %}
 
-    <label>Teacher:</label>
-    <input type="text" id="teacher" readonly><br><br>
+    {% if form.non_field_errors %}
+      <div class="alert alert-error">{{ form.non_field_errors }}</div>
+    {% endif %}
 
-    <label>Time:</label>
-    <input type="text" id="time" readonly><br><br>
-  {% endif %}
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="id_name">Full Name <span class="required">*</span></label>
+        {{ form.name }}
+        <div class="validation-message" id="name-validation"></div>
+        {{ form.name.errors }}
+      </div>
 
-  <button type="submit">Start Quiz</button>
-</form>
+      <div class="form-group">
+        <label for="id_phone">Phone Number <span class="required">*</span></label>
+        {{ form.phone }}
+        <div class="validation-message" id="phone-validation"></div>
+        {{ form.phone.errors }}
+      </div>
 
-<p style="margin-top: 16px;">
-  Already registered? <a href="{% url 'student_login' %}">Student Login</a>
-</p>
+      <div class="form-group">
+        <label for="id_email">Email Address <span class="required">*</span></label>
+        {{ form.email }}
+        <div class="validation-message" id="email-validation"></div>
+        {{ form.email.errors }}
+      </div>
+    </div>
 
+    <div class="form-group full-width">
+      <label for="id_password">Password <span class="required">*</span></label>
+      {{ form.password }}
+      <div class="validation-message" id="password-validation"></div>
+      <div id="password-strength" class="password-strength"></div>
+      <div class="help-text">At least 6 characters with letters and numbers recommended</div>
+      {{ form.password.errors }}
+    </div>
 
-<script id="session-data" type="application/json">
-    {{ sessions_json|safe }}
-</script>
+    <button type="submit" class="btn-submit">
+      <span class="btn-icon">✓</span> Register Account
+    </button>
+
+    <p class="form-footer">
+      Already registered? <a href="{% url 'student_login' %}" class="link-primary">Login here</a>
+    </p>
+  </form>
+</div>
 
 <script>
-    function updateSessionDetails() {
-        const raw = document.getElementById('session-data').textContent;
-        const sessions = JSON.parse(raw);
+  document.addEventListener('DOMContentLoaded', function(){
+    const form = document.getElementById('registration-form');
+    const nameField = document.getElementById('id_name');
+    const phoneField = document.getElementById('id_phone');
+    const emailField = document.getElementById('id_email');
+    const passwordField = document.getElementById('id_password');
 
-        const selectedId = document.getElementById('class_session').value;
-        const teacherField = document.getElementById('teacher');
-        const timeField = document.getElementById('time');
-
-        const session = sessions.find(s => s.id == selectedId);
-        if (session) {
-            teacherField.value = session.teacher;
-
-            const start = new Date(session.start_time);
-            const end = new Date(session.end_time);
-
-            const formatTime = t => {
-                let hours = t.getHours();
-                let minutes = t.getMinutes();
-                let ampm = hours >= 12 ? 'PM' : 'AM';
-                hours = hours % 12 || 12;
-                return `${hours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
-            };
-
-            timeField.value = `${formatTime(start)} – ${formatTime(end)}`;
-        } else {
-            teacherField.value = '';
-            timeField.value = '';
+    // Form submission validation
+    if (form) {
+      form.addEventListener('submit', function(e) {
+        let hasErrors = false;
+        
+        // Validate required fields before submit
+        if (nameField && !nameField.value.trim()) {
+          showValidation('name', '⚠️ Name is required', true);
+          addFieldBorder(nameField, true);
+          hasErrors = true;
         }
+        
+        if (phoneField && !phoneField.value.trim()) {
+          showValidation('phone', '⚠️ Phone number is required', true);
+          addFieldBorder(phoneField, true);
+          hasErrors = true;
+        } else if (phoneField && !/^\d{10}$/.test(phoneField.value.trim())) {
+          showValidation('phone', '⚠️ Phone must be exactly 10 digits', true);
+          addFieldBorder(phoneField, true);
+          hasErrors = true;
+        }
+        
+        if (emailField && !emailField.value.trim()) {
+          showValidation('email', '⚠️ Email is required', true);
+          addFieldBorder(emailField, true);
+          hasErrors = true;
+        }
+        
+        if (passwordField && !passwordField.value.trim()) {
+          showValidation('password', '⚠️ Password is required', true);
+          addFieldBorder(passwordField, true);
+          hasErrors = true;
+        } else if (passwordField && passwordField.value.trim().length < 6) {
+          showValidation('password', '⚠️ Password must be at least 6 characters', true);
+          addFieldBorder(passwordField, true);
+          hasErrors = true;
+        }
+        
+        // If there are validation errors, prevent submission and scroll to first error
+        if (hasErrors) {
+          e.preventDefault();
+          showAlert(
+            'Validation Error',
+            'Please fill in all required fields correctly before submitting.',
+            'error'
+          );
+          const firstError = document.querySelector('.validation-error');
+          if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          return false;
+        }
+        
+        // Allow form submission if no errors
+        return true;
+      });
     }
+
+    // Validation helper functions
+    function showValidation(fieldId, message, isError) {
+      const validationDiv = document.getElementById(fieldId + '-validation');
+      if (validationDiv) {
+        if (message) {
+          validationDiv.textContent = message;
+          validationDiv.className = 'validation-message ' + (isError ? 'validation-error' : 'validation-success');
+        } else {
+          validationDiv.textContent = '';
+          validationDiv.className = 'validation-message';
+        }
+      }
+    }
+
+    function addFieldBorder(field, isError) {
+      if (field) {
+        if (isError) {
+          field.classList.remove('input-success');
+          field.classList.add('input-error');
+        } else if (field.value.trim()) {
+          field.classList.remove('input-error');
+          field.classList.add('input-success');
+        } else {
+          field.classList.remove('input-error', 'input-success');
+        }
+      }
+    }
+    
+    // Show alert message
+    function showAlert(title, message, type = 'error') {
+      // Remove any existing alerts
+      const existingAlert = document.querySelector('.form-alert');
+      if (existingAlert) {
+        existingAlert.remove();
+      }
+      
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `form-alert form-alert-${type}`;
+      alertDiv.innerHTML = `
+        <div class="form-alert-icon">${type === 'error' ? '⚠️' : '✓'}</div>
+        <div class="form-alert-content">
+          <div class="form-alert-title">${title}</div>
+          <div class="form-alert-message">${message}</div>
+        </div>
+        <button class="form-alert-close" onclick="this.parentElement.remove()">×</button>
+      `;
+      
+      document.body.appendChild(alertDiv);
+      
+      // Auto-remove after 5 seconds
+      setTimeout(() => {
+        if (alertDiv.parentElement) {
+          alertDiv.style.animation = 'slideInRight 0.4s ease-out reverse';
+          setTimeout(() => alertDiv.remove(), 400);
+        }
+      }, 5000);
+    }
+
+    // Name validation
+    if (nameField) {
+      nameField.addEventListener('blur', function() {
+        if (!this.value.trim()) {
+          showValidation('name', '⚠️ Name is required', true);
+          addFieldBorder(this, true);
+        } else if (this.value.trim().length < 2) {
+          showValidation('name', '⚠️ Name must be at least 2 characters', true);
+          addFieldBorder(this, true);
+        } else {
+          showValidation('name', '✓ Looks good', false);
+          addFieldBorder(this, false);
+        }
+      });
+
+      nameField.addEventListener('input', function() {
+        if (this.value.trim().length >= 2) {
+          showValidation('name', '✓ Looks good', false);
+          addFieldBorder(this, false);
+        }
+      });
+    }
+
+    // Phone validation
+    if (phoneField) {
+      phoneField.addEventListener('blur', function() {
+        const phoneValue = this.value.trim();
+        if (!phoneValue) {
+          showValidation('phone', '⚠️ Phone number is required', true);
+          addFieldBorder(this, true);
+        } else if (!/^\d{10}$/.test(phoneValue)) {
+          showValidation('phone', '⚠️ Phone must be exactly 10 digits', true);
+          addFieldBorder(this, true);
+        } else {
+          showValidation('phone', '✓ Valid phone number', false);
+          addFieldBorder(this, false);
+        }
+      });
+
+      phoneField.addEventListener('input', function() {
+        const phoneValue = this.value.trim();
+        if (/^\d{10}$/.test(phoneValue)) {
+          showValidation('phone', '✓ Valid phone number', false);
+          addFieldBorder(this, false);
+        } else if (phoneValue.length > 0) {
+          showValidation('phone', `${phoneValue.length}/10 digits`, true);
+        }
+      });
+    }
+
+    // Email validation
+    if (emailField) {
+      emailField.addEventListener('blur', function() {
+        const emailValue = this.value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailValue) {
+          showValidation('email', '⚠️ Email is required', true);
+          addFieldBorder(this, true);
+        } else if (!emailRegex.test(emailValue)) {
+          showValidation('email', '⚠️ Please enter a valid email address', true);
+          addFieldBorder(this, true);
+        } else {
+          showValidation('email', '✓ Valid email', false);
+          addFieldBorder(this, false);
+        }
+      });
+
+      emailField.addEventListener('input', function() {
+        const emailValue = this.value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (emailRegex.test(emailValue)) {
+          showValidation('email', '✓ Valid email', false);
+          addFieldBorder(this, false);
+        }
+      });
+    }
+
+    // Password validation
+    if (passwordField) {
+      passwordField.addEventListener('blur', function() {
+        const passwordValue = this.value.trim();
+        if (!passwordValue) {
+          showValidation('password', '⚠️ Password is required', true);
+          addFieldBorder(this, true);
+        } else if (passwordValue.length < 6) {
+          showValidation('password', '⚠️ Password must be at least 6 characters', true);
+          addFieldBorder(this, true);
+        } else {
+          showValidation('password', '✓ Valid password', false);
+          addFieldBorder(this, false);
+        }
+      });
+
+      passwordField.addEventListener('input', function() {
+        const passwordValue = this.value.trim();
+        if (passwordValue.length >= 6) {
+          showValidation('password', '✓ Valid password', false);
+          addFieldBorder(this, false);
+        }
+      });
+    }
+
+    // Password strength indicator
+    const strengthDiv = document.getElementById('password-strength');
+    
+    if (passwordField && strengthDiv) {
+      passwordField.addEventListener('input', function() {
+        const pwd = this.value;
+        let strength = 0;
+        let feedback = '';
+        let color = '';
+        let barWidth = 0;
+        
+        if (pwd.length === 0) {
+          strengthDiv.innerHTML = '';
+          return;
+        }
+        
+        // Length check
+        if (pwd.length >= 6) strength += 1;
+        if (pwd.length >= 10) strength += 1;
+        
+        // Has letters
+        if (/[a-zA-Z]/.test(pwd)) strength += 1;
+        
+        // Has numbers
+        if (/\d/.test(pwd)) strength += 1;
+        
+        // Has special characters
+        if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd)) strength += 1;
+        
+        // Has mixed case
+        if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) strength += 1;
+        
+        if (strength <= 2) {
+          feedback = '❌ Weak';
+          color = '#d32f2f';
+          barWidth = 33;
+        } else if (strength <= 4) {
+          feedback = '⚠️ Medium';
+          color = '#f57c00';
+          barWidth = 66;
+        } else {
+          feedback = '✅ Strong';
+          color = '#388e3c';
+          barWidth = 100;
+        }
+        
+        strengthDiv.innerHTML = `
+          <div class="strength-bar">
+            <div class="strength-bar-fill" style="width: ${barWidth}%; background-color: ${color};"></div>
+          </div>
+          <span class="strength-label" style="color: ${color};">${feedback}</span>
+        `;
+      });
+    }
+  });
 </script>
+
+{% endblock %}

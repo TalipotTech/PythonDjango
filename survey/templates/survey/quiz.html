@@ -1,16 +1,387 @@
-<h2>{{ class_session.title }}</h2>
+{% extends 'base.html' %}
 
-<form method="post">
-  {% csrf_token %}
-  {% for q in questions %}
-    <div>
-      <p>{{ q.text }}</p>
+{% block title %}Quiz - {{ class_session.title }}{% endblock %}
 
-      <label><input type="radio" name="question_{{ q.id }}" value="1"> {{ q.option1 }}</label><br>
-      <label><input type="radio" name="question_{{ q.id }}" value="2"> {{ q.option2 }}</label><br>
-      <label><input type="radio" name="question_{{ q.id }}" value="3"> {{ q.option3 }}</label><br>
-      <label><input type="radio" name="question_{{ q.id }}" value="4"> {{ q.option4 }}</label><br>
+{% block content %}
+<div class="quiz-container">
+  <!-- Countdown Timer Display -->
+  <div class="timer-container" id="timer-container">
+    <div class="timer-icon">⏱️</div>
+    <div class="timer-display">
+      <div class="timer-label">Time Remaining:</div>
+      <div class="timer-value" id="timer-value">
+        <span id="minutes">--</span>:<span id="seconds">--</span>
+      </div>
     </div>
-  {% endfor %}
-  <button type="submit">Submit</button>
-</form>
+    <div class="timer-warning" id="timer-warning" style="display: none;">
+      ⚠️ Time is running out!
+    </div>
+  </div>
+
+  <h2 class="quiz-title">📝 {{ class_session.title }}</h2>
+  <p class="quiz-subtitle">Answer all questions and submit when ready</p>
+  
+  <div class="quiz-info-banner">
+    ℹ️ <strong>Important:</strong> You can only attempt this quiz once. The quiz will auto-submit when time expires.
+  </div>
+
+  <form method="post" class="quiz-form" id="quiz-form">
+    {% csrf_token %}
+    
+    {% for q in questions %}
+      <div class="question-card">
+        <p class="question-text"><strong>Q{{ forloop.counter }}:</strong> {{ q.text }}</p>
+        
+        {% if q.question_type == 'text_response' %}
+          <!-- Text Response Question -->
+          <div class="text-response-group">
+            <textarea 
+              name="text_question_{{ q.id }}" 
+              class="text-response-input"
+              rows="5"
+              placeholder="Write your answer here..."
+              required
+              minlength="10"
+            ></textarea>
+            <small class="text-help">Minimum 10 characters required</small>
+          </div>
+        {% else %}
+          <!-- Multiple Choice Question -->
+          <div class="options-group">
+            <label class="option-label">
+              <input type="radio" name="question_{{ q.id }}" value="1" required>
+              <span>{{ q.option1 }}</span>
+            </label>
+            
+            <label class="option-label">
+              <input type="radio" name="question_{{ q.id }}" value="2" required>
+              <span>{{ q.option2 }}</span>
+            </label>
+            
+            <label class="option-label">
+              <input type="radio" name="question_{{ q.id }}" value="3" required>
+              <span>{{ q.option3 }}</span>
+            </label>
+            
+            <label class="option-label">
+              <input type="radio" name="question_{{ q.id }}" value="4" required>
+              <span>{{ q.option4 }}</span>
+            </label>
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+    
+    <button type="submit" class="btn-submit" id="submit-btn">
+      <span class="btn-icon">✓</span> Submit Quiz
+    </button>
+  </form>
+</div>
+
+<script>
+  // Quiz timer countdown
+  let timeRemaining = {{ time_remaining_seconds }};
+  const timerDisplay = document.getElementById('timer-value');
+  const minutesDisplay = document.getElementById('minutes');
+  const secondsDisplay = document.getElementById('seconds');
+  const timerContainer = document.getElementById('timer-container');
+  const timerWarning = document.getElementById('timer-warning');
+  const quizForm = document.getElementById('quiz-form');
+
+  function updateTimer() {
+    if (timeRemaining <= 0) {
+      // Time's up - auto submit the form
+      alert('⏰ Time is up! Your quiz will be submitted automatically.');
+      quizForm.submit();
+      return;
+    }
+
+    const minutes = Math.floor(timeRemaining / 60);
+    const seconds = timeRemaining % 60;
+
+    minutesDisplay.textContent = minutes.toString().padStart(2, '0');
+    secondsDisplay.textContent = seconds.toString().padStart(2, '0');
+
+    // Change color when less than 5 minutes remaining
+    if (timeRemaining <= 300) {
+      timerContainer.classList.add('timer-warning-state');
+      if (timeRemaining <= 60) {
+        timerContainer.classList.add('timer-critical');
+        timerWarning.style.display = 'block';
+        timerWarning.textContent = '⚠️ Less than 1 minute remaining!';
+      } else {
+        timerWarning.style.display = 'block';
+        timerWarning.textContent = '⚠️ Time is running out!';
+      }
+    }
+
+    timeRemaining--;
+  }
+
+  // Update timer immediately on load
+  updateTimer();
+
+  // Update timer every second
+  const timerInterval = setInterval(updateTimer, 1000);
+
+  // Form submission - remove warning when submitting
+  quizForm.addEventListener('submit', function() {
+    window.onbeforeunload = null;
+  });
+
+  // Disable back button
+  history.pushState(null, null, location.href);
+  window.onpopstate = function () {
+    history.go(1);
+    alert('⚠️ You cannot go back while taking the quiz!');
+  };
+</script>
+
+<style>
+.timer-container {
+  position: sticky;
+  top: 20px;
+  z-index: 1000;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 15px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: all 0.3s ease;
+}
+
+.timer-container.timer-warning-state {
+  background: linear-gradient(135deg, #f57c00 0%, #ff9800 100%);
+  animation: pulse 2s infinite;
+}
+
+.timer-container.timer-critical {
+  background: linear-gradient(135deg, #d32f2f 0%, #f44336 100%);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+.timer-icon {
+  font-size: 2.5rem;
+  animation: tick 1s infinite;
+}
+
+@keyframes tick {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-10deg); }
+  75% { transform: rotate(10deg); }
+}
+
+.timer-display {
+  flex: 1;
+}
+
+.timer-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin-bottom: 5px;
+}
+
+.timer-value {
+  font-size: 2.5rem;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 3px;
+}
+
+.timer-warning {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-weight: 600;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.quiz-info-banner {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  color: #856404;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+}
+
+.quiz-container {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
+}
+
+.quiz-title {
+  text-align: center;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.quiz-subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.question-card {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.question-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.question-text {
+  font-size: 1.1rem;
+  color: #333;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.options-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.text-response-group {
+  margin-top: 1rem;
+}
+
+.text-response-input {
+  width: 100%;
+  padding: 1rem;
+  border: 3px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  transition: all 0.3s ease;
+  resize: vertical;
+  min-height: 120px;
+}
+
+.text-response-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.text-help {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.option-label {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #fafafa;
+}
+
+.option-label:hover {
+  border-color: #667eea;
+  background: #f0f4ff;
+  transform: translateX(5px);
+}
+
+.option-label input[type="radio"] {
+  margin-right: 12px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.option-label input[type="radio"]:checked + span {
+  font-weight: 600;
+  color: #667eea;
+}
+
+.option-label:has(input[type="radio"]:checked) {
+  border-color: #667eea;
+  background: #f0f4ff;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 18px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 30px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.btn-submit:active {
+  transform: translateY(0);
+}
+
+.btn-icon {
+  margin-right: 8px;
+  font-size: 1.3rem;
+}
+
+@media (max-width: 768px) {
+  .quiz-container {
+    padding: 10px;
+  }
+
+  .timer-container {
+    flex-direction: column;
+    text-align: center;
+    padding: 15px;
+  }
+
+  .timer-value {
+    font-size: 2rem;
+  }
+
+  .question-card {
+    padding: 15px;
+  }
+
+  .option-label {
+    padding: 12px;
+  }
+}
+</style>
+
+{% endblock %}

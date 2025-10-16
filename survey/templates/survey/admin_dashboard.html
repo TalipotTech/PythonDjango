@@ -1,48 +1,899 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
 <div class="dashboard-container">
-  <h2>📊 Admin Dashboard</h2>
+  <div class="dashboard-header">
+    <h1>🔐 Admin Dashboard</h1>
+    <p>Welcome back, <strong>{{ admin_username }}</strong></p>
+  </div>
 
-  {% for attendee in attendees %}
-    <div class="attendee-card">
-      <h3>{{ attendee.name }} ({{ attendee.class_session.title }})</h3>
-      <p><strong>Email:</strong> {{ attendee.email }}</p>
-      <p><strong>Score:</strong> {{ attendee.total_correct }} / {{ attendee.total_attempted }} ({{ attendee.score_percent }}%)</p>
+  <!-- Search Bar -->
+  <div class="search-section">
+    <h3 class="search-title">🔍 Search Dashboard</h3>
+    <form method="GET" action="{% url 'admin_dashboard' %}" class="search-form">
+      <div class="search-input-wrapper">
+        <span class="search-icon">🔎</span>
+        <input 
+          type="text" 
+          name="search" 
+          placeholder="Type to search sessions, attendees, or reviews..." 
+          value="{{ search_query }}"
+          class="search-input"
+          autocomplete="off"
+        >
+        {% if search_query %}
+          <span class="search-active-badge">Active</span>
+        {% endif %}
+      </div>
+      <div class="search-filters">
+        <select name="search_filter" class="filter-select-search">
+          <option value="all" {% if search_filter == 'all' %}selected{% endif %}>All</option>
+          <option value="sessions" {% if search_filter == 'sessions' %}selected{% endif %}>Sessions Only</option>
+          <option value="attendees" {% if search_filter == 'attendees' %}selected{% endif %}>Attendees Only</option>
+          <option value="reviews" {% if search_filter == 'reviews' %}selected{% endif %}>Reviews Only</option>
+        </select>
+      </div>
+      <div class="search-buttons">
+        <button type="submit" class="btn btn-search">🔍 Search</button>
+        {% if search_query %}
+          <a href="{% url 'admin_dashboard' %}" class="btn btn-clear">✖ Clear</a>
+        {% endif %}
+      </div>
+    </form>
+    {% if search_query %}
+      <div class="search-info">
+        Showing results for: <strong>"{{ search_query }}"</strong>
+        {% if search_filter != 'all' %}
+          in <strong>{{ search_filter }}</strong>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
 
-      <table class="response-table">
+  <!-- Statistics Cards -->
+  <div class="stats-grid">
+    <div class="stat-card stat-primary">
+      <div class="stat-icon">👥</div>
+      <div class="stat-content">
+        <h3>{{ total_attendees }}</h3>
+        <p>Total Attendees</p>
+      </div>
+    </div>
+
+    <div class="stat-card stat-success">
+      <div class="stat-icon">📚</div>
+      <div class="stat-content">
+        <h3>{{ total_sessions }}</h3>
+        <p>Class Sessions</p>
+      </div>
+    </div>
+
+    <div class="stat-card stat-warning">
+      <div class="stat-icon">❓</div>
+      <div class="stat-content">
+        <h3>{{ total_questions }}</h3>
+        <p>Total Questions</p>
+      </div>
+    </div>
+
+    <div class="stat-card stat-info">
+      <div class="stat-icon">✅</div>
+      <div class="stat-content">
+        <h3>{{ total_responses }}</h3>
+        <p>Responses Submitted</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Session Management -->
+  <div class="dashboard-section">
+    <div class="section-header">
+      <h2>📅 Class Sessions</h2>
+      <div class="header-actions">
+        <a href="{% url 'admin_session_create' %}" class="btn btn-primary">➕ Add New Session</a>
+        <select id="sessionFilter" class="filter-select" onchange="filterSessions(this.value)">
+          <option value="all" {% if session_filter == 'all' %}selected{% endif %}>All Sessions</option>
+          <option value="active" {% if session_filter == 'active' %}selected{% endif %}>✅ Active</option>
+          <option value="inactive" {% if session_filter == 'inactive' %}selected{% endif %}>⏳ Inactive</option>
+          <option value="finished" {% if session_filter == 'finished' %}selected{% endif %}>🔴 Finished</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="data-table">
         <thead>
           <tr>
-            <th>Question</th>
-            <th>Selected Answer</th>
-            <th>Correct?</th>
+            <th>Session Title</th>
+            <th>Teacher</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Status</th>
+            <th>Attendees</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {% for response in attendee.responses %}
-            <tr>
-              <td>{{ response.question.text }}</td>
-              <td>
-                {% if response.selected_option == 1 %}{{ response.question.option1 }}
-                {% elif response.selected_option == 2 %}{{ response.question.option2 }}
-                {% elif response.selected_option == 3 %}{{ response.question.option3 }}
-                {% elif response.selected_option == 4 %}{{ response.question.option4 }}
-                {% else %}Invalid{% endif %}
-              </td>
-              <td>
-                {% if response.selected_option == response.question.correct_option %}
-                  ✅
-                {% else %}
-                  ❌
-                {% endif %}
-              </td>
-            </tr>
+          {% for session in sessions %}
+          <tr>
+            <td><strong>{{ session.title }}</strong></td>
+            <td>{{ session.teacher }}</td>
+            <td>{{ session.start_time|date:"M d, Y H:i" }}</td>
+            <td>{{ session.end_time|date:"M d, Y H:i" }}</td>
+            <td><span class="badge {{ session.status_class }}">{{ session.status_label }}</span></td>
+            <td><span class="badge badge-info">{{ session.attendee_set.count }}</span></td>
+            <td>
+              <a href="{% url 'admin_session_view' session.id %}" class="btn-icon" title="View Details">👁️</a>
+              <a href="{% url 'admin_session_edit' session.id %}" class="btn-icon" title="Edit">✏️</a>
+              <a href="{% url 'admin_question_add' session.id %}" class="btn-icon btn-icon-quiz" title="Manage Quiz Questions">📝</a>
+              <a href="{% url 'admin_session_delete' session.id %}" 
+                 class="btn-icon" 
+                 title="Delete"
+                 onclick="return confirm('Are you sure you want to delete this session? This will also delete all related questions and responses.')">🗑️</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="text-center">No sessions found</td>
+          </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
-  {% empty %}
-    <p>No attendees have submitted responses yet.</p>
-  {% endfor %}
+  </div>
+
+  <!-- Recent Attendees -->
+  <div class="dashboard-section">
+    <div class="section-header">
+      <h2>👥 Recent Attendees</h2>
+      <button type="button" class="btn btn-danger-sm" onclick="deleteSelectedAttendees()">🗑️ Delete Selected</button>
+    </div>
+    <form id="attendeesForm" method="POST" action="{% url 'admin_bulk_delete_attendees' %}">
+      {% csrf_token %}
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="selectAllAttendees" onclick="toggleAllAttendees(this)"></th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Session</th>
+              <th>Age</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for attendee in recent_attendees %}
+            <tr>
+              <td><input type="checkbox" name="attendee_ids" value="{{ attendee.id }}" class="attendee-select"></td>
+              <td><strong>{{ attendee.name }}</strong></td>
+              <td>{{ attendee.email }}</td>
+              <td>{{ attendee.phone }}</td>
+              <td>{{ attendee.class_session.title|default:"N/A" }}</td>
+              <td>{{ attendee.age|default:"N/A" }}</td>
+              <td>
+                {% if attendee.has_submitted %}
+                  <span class="badge badge-success">✓ Submitted</span>
+                {% else %}
+                  <span class="badge badge-pending">⏳ Pending</span>
+                {% endif %}
+              </td>
+              <td>
+                <a href="{% url 'admin_attendee_view' attendee.id %}" class="btn-icon" title="View Details">👁️</a>
+                <a href="{% url 'admin_attendee_edit' attendee.id %}" class="btn-icon" title="Edit">✏️</a>
+                <a href="{% url 'admin_attendee_delete' attendee.id %}" 
+                   class="btn-icon" 
+                   title="Delete"
+                   onclick="return confirm('Are you sure you want to delete this attendee? This will also delete all their responses.')">🗑️</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="8" class="text-center">No attendees yet</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </form>
+  </div>
+
+  <!-- Reviews -->
+  <div class="dashboard-section">
+    <div class="section-header">
+      <h2>💬 Recent Reviews</h2>
+      <button type="button" class="btn btn-danger-sm" onclick="deleteSelectedReviews()">🗑️ Delete Selected</button>
+    </div>
+    <form id="reviewsForm" method="POST" action="{% url 'admin_bulk_delete_reviews' %}">
+      {% csrf_token %}
+      <div class="reviews-list">
+        {% for review in recent_reviews %}
+        <div class="review-card-new">
+          <div class="review-checkbox">
+            <input type="checkbox" name="review_ids" value="{{ review.id }}" class="review-select">
+          </div>
+          <div class="review-body">
+            <div class="review-header">
+              <div class="review-author">
+                <strong>{{ review.attendee.name }}</strong>
+                {% if review.attendee.class_session %}
+                  <span class="review-session-badge">{{ review.attendee.class_session.title }}</span>
+                {% endif %}
+              </div>
+              <div class="review-meta">
+                <span class="review-date">{{ review.submitted_at|date:"M d, Y H:i" }}</span>
+                <a href="{% url 'admin_review_delete' review.id %}" 
+                   class="btn-icon-danger" 
+                   title="Delete Review"
+                   onclick="return confirm('Are you sure you want to delete this review?')">🗑️</a>
+              </div>
+            </div>
+            <p class="review-content">{{ review.content }}</p>
+          </div>
+        </div>
+        {% empty %}
+        <p class="text-muted">No reviews submitted yet</p>
+        {% endfor %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Logout Button -->
+  <div class="dashboard-actions">
+    <a href="{% url 'admin_logout' %}" class="btn btn-danger">🚪 Logout</a>
+  </div>
 </div>
+
+<script>
+function filterSessions(value) {
+  const currentUrl = new URL(window.location.href);
+  currentUrl.searchParams.set('session_filter', value);
+  window.location.href = currentUrl.toString();
+}
+
+function deleteSelectedReviews() {
+  const form = document.getElementById('reviewsForm');
+  const checkboxes = form.querySelectorAll('input[name="review_ids"]:checked');
+  
+  if (checkboxes.length === 0) {
+    alert('Please select at least one review to delete');
+    return;
+  }
+  
+  if (confirm(`Are you sure you want to delete ${checkboxes.length} review(s)?`)) {
+    form.submit();
+  }
+}
+
+function deleteSelectedAttendees() {
+  const form = document.getElementById('attendeesForm');
+  const checkboxes = form.querySelectorAll('input[name="attendee_ids"]:checked');
+  
+  if (checkboxes.length === 0) {
+    alert('Please select at least one attendee to delete');
+    return;
+  }
+  
+  if (confirm(`Are you sure you want to delete ${checkboxes.length} attendee(s)? This will also delete all their responses.`)) {
+    form.submit();
+  }
+}
+
+function toggleAllAttendees(source) {
+  const checkboxes = document.getElementsByClassName('attendee-select');
+  for (let i = 0; i < checkboxes.length; i++) {
+    checkboxes[i].checked = source.checked;
+  }
+}
+</script>
+
+<style>
+.dashboard-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+}
+
+.dashboard-header p {
+  margin: 0.5rem 0 0 0;
+  opacity: 0.9;
+}
+
+.search-section {
+  margin-bottom: 2rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border: 2px solid #e0e7ff;
+}
+
+.search-title {
+  margin: 0 0 1rem 0;
+  color: #667eea;
+  font-size: 1.3rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search-form {
+  display: flex;
+  gap: 1rem;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
+.search-input-wrapper {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 300px;
+}
+
+.search-filters {
+  display: flex;
+  align-items: center;
+}
+
+.filter-select-search {
+  padding: 1rem 1.5rem;
+  border: 3px solid #667eea;
+  border-radius: 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+  color: #1f2937;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+}
+
+.filter-select-search:focus {
+  outline: none;
+  border-color: #764ba2;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.25);
+}
+
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  font-size: 1.3rem;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.search-input {
+  flex: 1;
+  padding: 1rem 1rem 1rem 3.5rem;
+  border: 3px solid #667eea;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  background: white;
+  color: #1f2937;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #764ba2;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.25);
+  transform: translateY(-2px);
+}
+
+.search-active-badge {
+  position: absolute;
+  right: 1rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.search-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-search {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  white-space: nowrap;
+}
+
+.btn-search:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-clear {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+  white-space: nowrap;
+}
+
+.btn-clear:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+.search-info {
+  margin-top: 1rem;
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border-left: 4px solid #3b82f6;
+  border-radius: 8px;
+  color: #1e40af;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.filter-select {
+  padding: 0.5rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.stat-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+.stat-icon {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.stat-content h3 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.stat-content p {
+  margin: 0.25rem 0 0 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.stat-primary { border-left: 5px solid #667eea; }
+.stat-success { border-left: 5px solid #10b981; }
+.stat-warning { border-left: 5px solid #f59e0b; }
+.stat-info { border-left: 5px solid #3b82f6; }
+
+.dashboard-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.section-header h2 {
+  margin: 0;
+  color: #1f2937;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.data-table th {
+  background-color: #f9fafb;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.data-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.badge {
+  padding: 0.375rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.badge-info {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-success {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.badge-pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.badge-warning {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.badge-danger {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  transition: transform 0.2s;
+  text-decoration: none;
+}
+
+.btn-icon:hover {
+  transform: scale(1.2);
+}
+
+.btn-icon-quiz {
+  color: #667eea;
+  font-weight: bold;
+}
+
+.btn-icon-quiz:hover {
+  color: #764ba2;
+  transform: scale(1.3);
+}
+
+.reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.review-card {
+  background: #f9fafb;
+  padding: 1.5rem;
+  border-radius: 10px;
+  border-left: 4px solid #667eea;
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.review-card-new {
+  display: flex;
+  gap: 1rem;
+  background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.review-card-new:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+  transform: translateY(-2px);
+}
+
+.review-checkbox {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 0.25rem;
+}
+
+.review-select {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #667eea;
+}
+
+.review-body {
+  flex: 1;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.review-author {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.review-session-badge {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1e40af;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.review-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.review-date {
+  color: #6b7280;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.review-content {
+  color: #374151;
+  line-height: 1.7;
+  margin: 0;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  border-left: 3px solid #667eea;
+}
+
+.btn-icon-danger {
+  color: #ef4444;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  padding: 0.25rem;
+  border-radius: 4px;
+}
+
+.btn-icon-danger:hover {
+  color: #dc2626;
+  background: #fee2e2;
+  transform: scale(1.1);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
+}
+
+.btn-danger-sm {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger-sm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.review-date {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.review-content {
+  color: #374151;
+  line-height: 1.6;
+}
+
+.dashboard-actions {
+  text-align: center;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 2px solid #e5e7eb;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-muted {
+  color: #6b7280;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .reviews-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .search-form {
+    flex-direction: column;
+  }
+  
+  .search-input-wrapper {
+    width: 100%;
+    min-width: 100%;
+  }
+  
+  .search-buttons {
+    width: 100%;
+    flex-direction: row;
+  }
+  
+  .btn-search,
+  .btn-clear {
+    flex: 1;
+  }
+  
+  .header-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .filter-select {
+    width: 100%;
+  }
+}
+</style>
 {% endblock %}

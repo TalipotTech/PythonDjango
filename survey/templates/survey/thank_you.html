@@ -1,14 +1,439 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Submission Successful!{% endblock %}
 
 {% block content %}
-<div class="thank-you-container">
-  <h2>✅ Thank You!</h2>
-  <p>Your responses have been submitted successfully.</p>
-  <p>We appreciate your participation in the {{ request.session.class_title }} session.</p>
+<div class="thankyou-container">
+  <div class="success-animation">
+    <div class="checkmark-circle">
+      <div class="checkmark-icon">✓</div>
+    </div>
+  </div>
 
-  <div class="button-group">
-    <a href="{% url 'home' %}" class="button">Back to Home</a>
-    <a href="{% url 'submit_review' %}" class="button">Leave a Review</a>
+  <div class="thankyou-content">
+    <h1 class="thankyou-title">Submission Successful!</h1>
+    <p class="thankyou-message">
+      🎉 Your quiz has been submitted successfully. Great job completing the assessment!
+    </p>
+
+    {% if attendee %}
+    <div class="submission-details">
+      <div class="detail-row">
+        <span class="detail-icon">👤</span>
+        <div class="detail-info">
+          <strong>{{ attendee.name }}</strong>
+          <span class="detail-label">Student Name</span>
+        </div>
+      </div>
+      {% if class_session %}
+      <div class="detail-row">
+        <span class="detail-icon">📚</span>
+        <div class="detail-info">
+          <strong>{{ class_session.title }}</strong>
+          <span class="detail-label">Class Session</span>
+        </div>
+      </div>
+      {% endif %}
+      {% if saved_count %}
+      <div class="detail-row">
+        <span class="detail-icon">✅</span>
+        <div class="detail-info">
+          <strong>{{ saved_count }} Question{{ saved_count|pluralize }}</strong>
+          <span class="detail-label">Answered</span>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="next-steps">
+      <h2>📋 What's Next?</h2>
+      <div class="steps-grid">
+        <a href="{% url 'student_dashboard' %}" class="step-card interactive">
+          <div class="step-icon">📊</div>
+          <h3>View Your Results</h3>
+          <p>Check your performance and see your score</p>
+          <span class="card-action">View Dashboard →</span>
+        </a>
+        <a href="{% url 'submit_review' %}" class="step-card interactive">
+          <div class="step-icon">�</div>
+          <h3>Share Feedback</h3>
+          <p>Tell us about your quiz experience</p>
+          <span class="card-action">Leave Review →</span>
+        </a>
+        <a href="{% url 'home' %}" class="step-card interactive">
+          <div class="step-icon">🎓</div>
+          <h3>Continue Learning</h3>
+          <p>Explore more courses and sessions</p>
+          <span class="card-action">Go to Home →</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="appreciation-message">
+      <div class="appreciation-icon">💙</div>
+      <p>Thank you for your participation and dedication to learning. Your effort makes a difference!</p>
+    </div>
   </div>
 </div>
+
+<style>
+.thankyou-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.success-animation {
+  margin-bottom: 2rem;
+  animation: fadeInScale 0.6s ease-out;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.checkmark-circle {
+  width: 150px;
+  height: 150px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4);
+  animation: pulse 2s infinite;
+  position: relative;
+}
+
+.checkmark-circle::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  opacity: 0.5;
+  animation: ripple 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+}
+
+.checkmark-icon {
+  font-size: 5rem;
+  color: white;
+  font-weight: bold;
+  animation: checkmarkDraw 0.6s ease-out 0.3s both;
+}
+
+@keyframes checkmarkDraw {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.thankyou-content {
+  animation: fadeInUp 0.6s ease-out 0.3s both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.thankyou-title {
+  font-size: 3rem;
+  color: #1f2937;
+  margin: 1rem 0;
+  font-weight: 700;
+}
+
+.thankyou-message {
+  font-size: 1.3rem;
+  color: #6b7280;
+  margin: 1rem 0 2rem 0;
+  line-height: 1.8;
+}
+
+.submission-details {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 3px solid #bae6fd;
+  border-radius: 20px;
+  padding: 2rem;
+  margin: 2rem 0;
+  display: inline-block;
+  min-width: 400px;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.1);
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem;
+  margin: 0.5rem 0;
+  background: white;
+  border-radius: 12px;
+  text-align: left;
+}
+
+.detail-icon {
+  font-size: 2.5rem;
+  min-width: 50px;
+  text-align: center;
+}
+
+.detail-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detail-info strong {
+  font-size: 1.2rem;
+  color: #1f2937;
+}
+
+.detail-label {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.next-steps {
+  margin: 3rem 0;
+}
+
+.next-steps h2 {
+  font-size: 2rem;
+  color: #1f2937;
+  margin-bottom: 2rem;
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.step-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 2px solid #e5e7eb;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  position: relative;
+  overflow: hidden;
+}
+
+.step-card.interactive {
+  cursor: pointer;
+}
+
+.step-card.interactive::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.step-card:hover::before {
+  left: 100%;
+}
+
+.step-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  border-color: #667eea;
+}
+
+.step-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.step-card:hover .step-icon {
+  transform: scale(1.2) rotate(5deg);
+}
+
+.step-card h3 {
+  font-size: 1.3rem;
+  color: #1f2937;
+  margin: 1rem 0 0.5rem 0;
+}
+
+.step-card p {
+  color: #6b7280;
+  margin: 0 0 1rem 0;
+  line-height: 1.6;
+}
+
+.card-action {
+  display: inline-block;
+  color: #667eea;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.step-card:hover .card-action {
+  color: #764ba2;
+  transform: translateX(5px);
+}
+
+.appreciation-message {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem;
+  border-radius: 20px;
+  margin: 3rem auto;
+  max-width: 700px;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.appreciation-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  animation: heartbeat 1.5s infinite;
+}
+
+@keyframes heartbeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.1);
+  }
+  50% {
+    transform: scale(1);
+  }
+}
+
+.appreciation-message p {
+  font-size: 1.2rem;
+  margin: 0;
+  line-height: 1.8;
+}
+
+@media (max-width: 768px) {
+  .thankyou-container {
+    padding: 2rem 1rem;
+  }
+
+  .thankyou-title {
+    font-size: 2rem;
+  }
+
+  .thankyou-message {
+    font-size: 1.1rem;
+  }
+
+  .checkmark-circle {
+    width: 120px;
+    height: 120px;
+  }
+
+  .checkmark-icon {
+    font-size: 4rem;
+  }
+
+  .submission-details {
+    min-width: auto;
+    width: 100%;
+    padding: 1.5rem;
+  }
+
+  .detail-icon {
+    font-size: 2rem;
+    min-width: 40px;
+  }
+
+  .steps-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .next-steps h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .thankyou-title {
+    font-size: 1.75rem;
+  }
+
+  .checkmark-circle {
+    width: 100px;
+    height: 100px;
+  }
+
+  .checkmark-icon {
+    font-size: 3rem;
+  }
+
+  .detail-row {
+    padding: 0.75rem;
+  }
+
+  .step-card {
+    padding: 1.5rem;
+  }
+
+  .appreciation-message {
+    padding: 1.5rem;
+  }
+
+  .appreciation-message p {
+    font-size: 1rem;
+  }
+}
+</style>
 {% endblock %}

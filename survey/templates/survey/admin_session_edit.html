@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if session %}Edit Session - {{ session.title }}{% else %}Create New Session{% endif %}{% endblock %}
+
+{% block content %}
+<div class="edit-container">
+  <div class="edit-header">
+    <h1>{% if session %}✏️ Edit Session{% else %}➕ Create New Session{% endif %}</h1>
+    <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">← Back to Dashboard</a>
+  </div>
+
+  <div class="form-card">
+    <form method="POST" action="{% if session %}{% url 'admin_session_edit' session.id %}{% else %}{% url 'admin_session_create' %}{% endif %}">
+      {% csrf_token %}
+      
+      <div class="form-group">
+        <label for="title">📚 Session Title *</label>
+        <input 
+          type="text" 
+          id="title" 
+          name="title" 
+          value="{% if session %}{{ session.title }}{% endif %}" 
+          required
+          class="form-input"
+          placeholder="e.g., Python Programming Basics"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="teacher">👨‍🏫 Teacher Name *</label>
+        <input 
+          type="text" 
+          id="teacher" 
+          name="teacher" 
+          value="{% if session %}{{ session.teacher }}{% endif %}" 
+          required
+          class="form-input"
+          placeholder="e.g., John Doe"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="start_time">🕐 Start Time *</label>
+        <input 
+          type="datetime-local" 
+          id="start_time" 
+          name="start_time" 
+          value="{% if session %}{{ session.start_time|date:'Y-m-d\TH:i' }}{% endif %}" 
+          required
+          class="form-input"
+        >
+        {% if session %}
+          <small>Current: {{ session.start_time|date:"F d, Y - H:i" }}</small>
+        {% else %}
+          <small>Set when the session becomes active</small>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="end_time">🕐 End Time *</label>
+        <input 
+          type="datetime-local" 
+          id="end_time" 
+          name="end_time" 
+          value="{% if session %}{{ session.end_time|date:'Y-m-d\TH:i' }}{% endif %}" 
+          required
+          class="form-input"
+        >
+        {% if session %}
+          <small>Current: {{ session.end_time|date:"F d, Y - H:i" }}</small>
+        {% else %}
+          <small>Set when the session expires</small>
+        {% endif %}
+      </div>
+
+      <div class="info-box">
+        <h3>ℹ️ Session Status Information</h3>
+        <ul>
+          <li><strong>⏳ Inactive:</strong> Session hasn't started yet (current time is before start time)</li>
+          <li><strong>✅ Active:</strong> Session is currently running (current time is between start and end time)</li>
+          <li><strong>🔴 Finished:</strong> Session has expired (current time is after end time)</li>
+        </ul>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">{% if session %}💾 Save Changes{% else %}➕ Create Session{% endif %}</button>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+.edit-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+}
+
+.edit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.edit-header h1 {
+  color: #1f2937;
+}
+
+.form-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.form-group small {
+  display: block;
+  margin-top: 0.5rem;
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.info-box {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border-left: 4px solid #3b82f6;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+}
+
+.info-box h3 {
+  margin: 0 0 1rem 0;
+  color: #1e40af;
+  font-size: 1rem;
+}
+
+.info-box ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  color: #1e3a8a;
+}
+
+.info-box li {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+  .edit-container {
+    padding: 1rem;
+  }
+
+  .edit-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+}
+</style>
+{% endblock %}
