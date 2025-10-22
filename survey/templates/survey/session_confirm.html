@@ -1,0 +1,440 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+<div class="confirm-wrapper">
+  <div class="confirm-container">
+    <div class="confirm-icon">
+      {% if session.status == 'current' %}
+        🟢
+      {% else %}
+        🔵
+      {% endif %}
+    </div>
+    
+    <h1 class="confirm-title">Do you want to attend this session?</h1>
+    
+    <div class="session-details-card">
+      <h2 class="session-name">{{ session.title }}</h2>
+      <p class="session-teacher">👨‍🏫 Instructor: {{ session.teacher }}</p>
+      
+      <div class="session-code-highlight">
+        <div class="code-label">🔑 Session Code:</div>
+        <div class="code-display">{{ session.session_code }}</div>
+      </div>
+      
+      <div class="session-time-details">
+        <div class="time-row">
+          <span class="time-icon">📅</span>
+          <div class="time-content">
+            <span class="time-label">Start Time:</span>
+            <span class="time-text">{{ start_time|date:"M d, Y - g:i A" }}</span>
+          </div>
+        </div>
+        
+        <div class="time-row">
+          <span class="time-icon">⏰</span>
+          <div class="time-content">
+            <span class="time-label">End Time:</span>
+            <span class="time-text">{{ end_time|date:"M d, Y - g:i A" }}</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Countdown Timer -->
+      <div class="countdown-box">
+        <div class="countdown-label">
+          {% if session.status == 'current' %}
+            ⏳ Time Remaining:
+          {% else %}
+            ⏳ Starts in:
+          {% endif %}
+        </div>
+        <div class="countdown-time" id="countdown-display">
+          <div class="time-block">
+            <span class="time-num" id="days">{{ session.countdown_days }}</span>
+            <span class="time-text">Days</span>
+          </div>
+          <span class="time-colon">:</span>
+          <div class="time-block">
+            <span class="time-num" id="hours">{{ session.countdown_hours }}</span>
+            <span class="time-text">Hours</span>
+          </div>
+          <span class="time-colon">:</span>
+          <div class="time-block">
+            <span class="time-num" id="minutes">{{ session.countdown_minutes }}</span>
+            <span class="time-text">Minutes</span>
+          </div>
+          <span class="time-colon">:</span>
+          <div class="time-block">
+            <span class="time-num" id="seconds">{{ session.countdown_seconds }}</span>
+            <span class="time-text">Seconds</span>
+          </div>
+        </div>
+      </div>
+      
+      {% if session.status == 'current' %}
+        <div class="status-badge live">
+          ✅ Event is LIVE NOW!
+        </div>
+      {% else %}
+        <div class="status-badge upcoming">
+          📅 Event Starts Soon
+        </div>
+      {% endif %}
+    </div>
+    
+    <form method="post" class="confirm-form">
+      {% csrf_token %}
+      <div class="action-buttons">
+        <button type="submit" class="btn-yes">
+          {% if session.status == 'current' %}
+            ✅ Yes, Join Now!
+          {% else %}
+            ✅ Yes, Register Me!
+          {% endif %}
+        </button>
+        <a href="{% url 'home' %}" class="btn-no">
+          ❌ No, Go Back
+        </a>
+      </div>
+    </form>
+    
+    <div class="info-note">
+      <p>💡 <strong>Note:</strong> You'll need to login or register to participate in this quiz event.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// Countdown timer
+let totalSeconds = {{ session.countdown_total_seconds }};
+
+function updateCountdown() {
+  if (totalSeconds <= 0) {
+    location.reload();
+    return;
+  }
+  
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  
+  document.getElementById('days').textContent = days.toString().padStart(2, '0');
+  document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+  document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+  document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+  
+  totalSeconds--;
+}
+
+// Update immediately
+updateCountdown();
+
+// Update every second
+setInterval(updateCountdown, 1000);
+</script>
+
+<style>
+.confirm-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+}
+
+.confirm-container {
+  max-width: 700px;
+  width: 100%;
+  background: white;
+  border-radius: 25px;
+  padding: 3rem;
+  box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.confirm-icon {
+  text-align: center;
+  font-size: 5rem;
+  margin-bottom: 1.5rem;
+  animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.confirm-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1a202c;
+  margin-bottom: 2rem;
+}
+
+.session-details-card {
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  border-radius: 20px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border: 2px solid #e2e8f0;
+}
+
+.session-name {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.session-teacher {
+  font-size: 1.2rem;
+  color: #4a5568;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.session-code-highlight {
+  background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
+  padding: 1.5rem;
+  border-radius: 15px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.code-label {
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.code-display {
+  background: white;
+  color: #ed8936;
+  padding: 1rem 2rem;
+  border-radius: 10px;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  font-family: 'Courier New', monospace;
+  display: inline-block;
+}
+
+.session-time-details {
+  margin-bottom: 1.5rem;
+}
+
+.time-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+}
+
+.time-icon {
+  font-size: 1.5rem;
+}
+
+.time-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.time-label {
+  font-size: 0.875rem;
+  color: #718096;
+  font-weight: 600;
+}
+
+.time-text {
+  font-size: 1.1rem;
+  color: #2d3748;
+  font-weight: 700;
+}
+
+.countdown-box {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 1.5rem;
+  border-radius: 15px;
+  margin-bottom: 1.5rem;
+}
+
+.countdown-label {
+  text-align: center;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.countdown-time {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.time-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 1rem;
+  border-radius: 12px;
+  min-width: 80px;
+}
+
+.time-num {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: white;
+  font-family: 'Courier New', monospace;
+}
+
+.time-block .time-text {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 0.25rem;
+}
+
+.time-colon {
+  font-size: 2rem;
+  color: white;
+  font-weight: 700;
+}
+
+.status-badge {
+  text-align: center;
+  padding: 1rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.status-badge.live {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+.status-badge.upcoming {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  color: white;
+}
+
+.confirm-form {
+  margin-bottom: 1.5rem;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-direction: column;
+}
+
+.btn-yes, .btn-no {
+  padding: 1.25rem 2rem;
+  border-radius: 15px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  display: block;
+  width: 100%;
+}
+
+.btn-yes {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  box-shadow: 0 4px 20px rgba(72, 187, 120, 0.4);
+}
+
+.btn-yes:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 25px rgba(72, 187, 120, 0.6);
+}
+
+.btn-no {
+  background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+  color: white;
+  box-shadow: 0 4px 20px rgba(245, 101, 101, 0.4);
+}
+
+.btn-no:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 25px rgba(245, 101, 101, 0.6);
+}
+
+.info-note {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.info-note p {
+  margin: 0;
+  color: #856404;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 768px) {
+  .confirm-container {
+    padding: 2rem 1.5rem;
+  }
+  
+  .confirm-title {
+    font-size: 1.75rem;
+  }
+  
+  .session-name {
+    font-size: 1.5rem;
+  }
+  
+  .countdown-time {
+    gap: 0.25rem;
+  }
+  
+  .time-block {
+    min-width: 60px;
+    padding: 0.75rem 0.5rem;
+  }
+  
+  .time-num {
+    font-size: 1.75rem;
+  }
+  
+  .time-colon {
+    font-size: 1.5rem;
+  }
+}
+</style>
+
+{% endblock %}

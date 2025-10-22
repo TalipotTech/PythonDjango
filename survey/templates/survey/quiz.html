@@ -18,8 +18,31 @@
     </div>
   </div>
 
+  <!-- Progress Indicator -->
+  {% if progress_stats %}
+  <div class="progress-banner">
+    <div class="progress-info">
+      <span class="progress-icon">📊</span>
+      <div class="progress-text">
+        <strong>Progress:</strong> 
+        {{ progress_stats.answered }} of {{ progress_stats.total }} questions answered 
+        ({{ progress_stats.pending }} pending)
+      </div>
+    </div>
+    <div class="progress-bar-container">
+      <div class="progress-bar" style="width: {{ progress_stats.percentage }}%">
+        {{ progress_stats.percentage }}%
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   <h2 class="quiz-title">📝 {{ class_session.title }}</h2>
-  <p class="quiz-subtitle">Answer all questions and submit when ready</p>
+  {% if progress_stats.answered > 0 %}
+    <p class="quiz-subtitle">Continue answering the remaining questions</p>
+  {% else %}
+    <p class="quiz-subtitle">Answer all questions and submit when ready</p>
+  {% endif %}
   
   <div class="quiz-info-banner">
     ℹ️ <strong>Important:</strong> You can only attempt this quiz once. The quiz will auto-submit when time expires.
@@ -39,11 +62,9 @@
               name="text_question_{{ q.id }}" 
               class="text-response-input"
               rows="5"
-              placeholder="Write your answer here..."
-              required
-              minlength="10"
+              placeholder="Write your answer here... (optional)"
             ></textarea>
-            <small class="text-help">Minimum 10 characters required</small>
+            <small class="text-help">Share your thoughts or type your answer</small>
           </div>
         {% else %}
           <!-- Multiple Choice Question -->
@@ -71,6 +92,20 @@
         {% endif %}
       </div>
     {% endfor %}
+
+    <!-- Feedback / Q&A (saved with your quiz and included in attempt time) -->
+    <div class="question-card feedback-card">
+      <p class="question-text"><strong>💬 Feedback / Question (optional):</strong></p>
+      <div class="text-response-group">
+        <textarea
+          name="feedback_content"
+          class="text-response-input"
+          rows="4"
+          placeholder="Submit a question or feedback during the quiz. This will be saved and counts toward your attempt time."
+        ></textarea>
+        <small class="text-help">Optional: ask the instructor or provide feedback. Saved when you submit the quiz.</small>
+      </div>
+    </div>
     
     <button type="submit" class="btn-submit" id="submit-btn">
       <span class="btn-icon">✓</span> Submit Quiz
@@ -218,6 +253,50 @@
   border-radius: 10px;
   margin-bottom: 20px;
   font-size: 0.95rem;
+}
+
+.progress-banner {
+  background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+  border: 2px solid #667eea;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.progress-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.progress-icon {
+  font-size: 1.5rem;
+}
+
+.progress-text {
+  font-size: 1rem;
+  color: #374151;
+}
+
+.progress-bar-container {
+  background: #e5e7eb;
+  height: 30px;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: width 0.3s ease;
 }
 
 .quiz-container {

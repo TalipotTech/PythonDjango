@@ -1,8 +1,23 @@
 from django.urls import path
 from . import views
+from . import api_views
 
 urlpatterns = [
     path('', views.home, name='home'),
+    
+    # New workflow URLs
+    path('session/<int:session_id>/request-code/', views.request_session_code, name='request_session_code'),
+    path('session/<int:session_id>/verify-code/', views.verify_session_code, name='verify_session_code'),
+    path('new/register/', views.new_participant_register, name='new_participant_register'),
+    path('new/login/', views.new_participant_login, name='new_participant_login'),
+    
+    # API endpoints
+    path('api/check-participant/', api_views.check_participant_exists, name='api_check_participant'),
+    path('session/<int:session_id>/confirm/', views.session_confirm, name='session_confirm'),
+    path('join/', views.session_code_entry, name='session_code_entry'),
+    path('identify/', views.participant_identify, name='participant_identify'),
+    path('participant/register/', views.participant_register, name='participant_register'),
+    path('participant/login/', views.participant_login, name='participant_login'),
     path('submit/', views.submit_response, name='submit_response'),
     path('quiz/', views.quiz_view, name='quiz'),
     path('thank-you/', views.thank_you_view, name='thank_you'),

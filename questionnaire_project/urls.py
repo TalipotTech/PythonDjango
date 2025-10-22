@@ -16,8 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import RedirectView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/', RedirectView.as_view(pattern_name='admin_login', permanent=False)),
+    path('django-admin/', admin.site.urls),  # Move Django admin to /django-admin/
     path('', include('survey.urls')),  # ✅ Includes homepage and all survey views
 ]

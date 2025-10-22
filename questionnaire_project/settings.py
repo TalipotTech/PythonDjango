@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -125,3 +126,31 @@ STATICFILES_DIRS = [BASE_DIR / "survey" / "static"]
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # No Django-auth login used for students; student flow uses session keys
+
+# ===== Email Configuration =====
+# Default: Using FILE backend for development (emails saved to a folder)
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = 'sent_emails'  # Folder where emails will be saved
+DEFAULT_FROM_EMAIL = 'Quiz Portal <noreply@quizportal.com>'
+
+# Optional SMTP configuration (set environment variables to enable)
+# Example environment variables:
+# SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_USE_TLS (true/false), SMTP_USE_SSL (true/false)
+SMTP_HOST = os.environ.get('SMTP_HOST')
+if SMTP_HOST:
+    # override defaults to use SMTP
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = os.environ.get('SMTP_HOST')
+    EMAIL_PORT = int(os.environ.get('SMTP_PORT', 587))
+    EMAIL_HOST_USER = os.environ.get('SMTP_USER', '')
+    EMAIL_HOST_PASSWORD = os.environ.get('SMTP_PASSWORD', '')
+    EMAIL_USE_TLS = os.environ.get('SMTP_USE_TLS', 'True').lower() in ('1', 'true', 'yes')
+    EMAIL_USE_SSL = os.environ.get('SMTP_USE_SSL', 'False').lower() in ('1', 'true', 'yes')
+
+# ========================================
+# TO SEE YOUR SESSION CODE (file backend):
+# 1. Enter your email on the website
+# 2. Look in the 'sent_emails' folder (in your project root)
+# 3. Open the newest file with Notepad
+# 4. Copy the session code from the file
+# ========================================

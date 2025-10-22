@@ -50,38 +50,39 @@
     <h3>📈 Quiz Performance</h3>
     <div class="stats-grid">
       <div class="stat-box">
-        <div class="stat-value">{{ total_questions }}</div>
-        <div class="stat-label">Total Questions</div>
+        <div class="stat-value">{{ total_mc_questions }}</div>
+        <div class="stat-label">Multiple Choice Questions</div>
       </div>
       <div class="stat-box">
         <div class="stat-value">{{ total_responses }}</div>
-        <div class="stat-label">Answered</div>
+        <div class="stat-label">Total Answers</div>
       </div>
       <div class="stat-box">
         <div class="stat-value">{{ correct_answers }}</div>
-        <div class="stat-label">Correct</div>
+        <div class="stat-label">Correct (MC)</div>
       </div>
       <div class="stat-box">
-        <div class="stat-value">{{ score }}%</div>
+        <div class="stat-value">{% if total_mc_questions > 0 %}{{ score }}%{% else %}N/A{% endif %}</div>
         <div class="stat-label">Score</div>
       </div>
     </div>
   </div>
 
-  {% if responses %}
+  {% if mc_responses %}
   <div class="table-section">
-    <h3>📝 Quiz Responses</h3>
+    <h3>📝 Multiple Choice Responses</h3>
     <table class="data-table">
       <thead>
         <tr>
           <th>#</th>
           <th>Question</th>
           <th>Selected Answer</th>
-          <th>Correct?</th>
+          <th>Correct Answer</th>
+          <th>Result</th>
         </tr>
       </thead>
       <tbody>
-        {% for response in responses %}
+        {% for response in mc_responses %}
         <tr>
           <td>{{ forloop.counter }}</td>
           <td>{{ response.question.text }}</td>
@@ -89,6 +90,13 @@
             {% if response.selected_option == 1 %}{{ response.question.option1 }}
             {% elif response.selected_option == 2 %}{{ response.question.option2 }}
             {% elif response.selected_option == 3 %}{{ response.question.option3 }}
+            {% else %}{{ response.question.option4 }}
+            {% endif %}
+          </td>
+          <td>
+            {% if response.question.correct_option == 1 %}{{ response.question.option1 }}
+            {% elif response.question.correct_option == 2 %}{{ response.question.option2 }}
+            {% elif response.question.correct_option == 3 %}{{ response.question.option3 }}
             {% else %}{{ response.question.option4 }}
             {% endif %}
           </td>
@@ -104,7 +112,27 @@
       </tbody>
     </table>
   </div>
-  {% else %}
+  {% endif %}
+
+  {% if text_responses %}
+  <div class="table-section">
+    <h3>💭 Text Responses</h3>
+    <div class="text-responses-container">
+      {% for response in text_responses %}
+      <div class="text-response-card">
+        <div class="response-question">
+          <strong>Q{{ forloop.counter }}:</strong> {{ response.question.text }}
+        </div>
+        <div class="response-text">
+          {{ response.text_response }}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if not mc_responses and not text_responses %}
   <div class="no-data-card">
     <p>No quiz responses yet</p>
   </div>
@@ -287,6 +315,36 @@
   text-align: center;
   color: #6b7280;
   margin-bottom: 2rem;
+}
+
+.text-responses-container {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.text-response-card {
+  background: #f9fafb;
+  border-left: 4px solid #667eea;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.response-question {
+  color: #374151;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.response-text {
+  color: #1f2937;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  background: white;
+  padding: 1rem;
+  border-radius: 6px;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
 }
 
 .action-buttons {

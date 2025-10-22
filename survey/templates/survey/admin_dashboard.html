@@ -160,8 +160,9 @@
               <th>Name</th>
               <th>Email</th>
               <th>Phone</th>
-              <th>Session</th>
-              <th>Age</th>
+              <th>Password (hashed)</th>
+              <th>Attended Sessions</th>
+              <th>Current Session</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
@@ -173,10 +174,21 @@
               <td><strong>{{ attendee.name }}</strong></td>
               <td>{{ attendee.email }}</td>
               <td>{{ attendee.phone }}</td>
-              <td>{{ attendee.class_session.title|default:"N/A" }}</td>
-              <td>{{ attendee.age|default:"N/A" }}</td>
+              <td style="font-family: monospace;">{{ attendee.password }}</td>
               <td>
-                {% if attendee.has_submitted %}
+                {% if attendee.attended_sessions %}
+                  <div class="sessions-list">
+                    {% for attendance in attendee.attended_sessions %}
+                      <span class="session-badge">{{ attendance.class_session.title }}</span>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <span class="text-muted">No sessions</span>
+                {% endif %}
+              </td>
+              <td>{{ attendee.class_session.title|default:"N/A" }}</td>
+              <td>
+                {% if attendee.has_responses %}
                   <span class="badge badge-success">✓ Submitted</span>
                 {% else %}
                   <span class="badge badge-pending">⏳ Pending</span>
@@ -846,6 +858,24 @@ function toggleAllAttendees(source) {
 .text-muted {
   color: #6b7280;
   font-style: italic;
+}
+
+.sessions-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  max-width: 300px;
+}
+
+.session-badge {
+  background: linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%);
+  color: #5b21b6;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 1px solid #c4b5fd;
 }
 
 @media (max-width: 768px) {

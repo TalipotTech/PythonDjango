@@ -1,0 +1,266 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_head %}
+<script src="{% static 'js/autofill.js' %}" defer></script>
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="register-wrapper">
+  <div class="register-container">
+    <div class="register-icon">📝</div>
+    
+    <h1 class="register-title">Complete Registration</h1>
+    <p class="register-subtitle">You're joining: <strong>{{ session.title }}</strong></p>
+    
+    {% if messages %}
+      <div class="messages-container">
+        {% for message in messages %}
+          <div class="message {{ message.tags }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    
+    <form method="post" class="register-form">
+      {% csrf_token %}
+      
+      <div class="info-display">
+        <div class="info-row">
+          <span class="info-label">Name:</span>
+          <span class="info-value">{{ name }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Phone:</span>
+          <span class="info-value">{{ phone }}</span>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="email">Email Address *</label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          placeholder="your.email@example.com"
+          required
+          autofocus
+        >
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Create Password *</label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          placeholder="Create a secure password"
+          minlength="4"
+          required
+        >
+        <small>You'll use this to login for future sessions</small>
+      </div>
+      
+      <button type="submit" class="btn-submit">
+        ✅ Complete Registration
+      </button>
+    </form>
+    
+    <div class="security-note">
+      <p>🔒 Your information is secure and will only be used for quiz sessions</p>
+    </div>
+  </div>
+</div>
+
+<style>
+.register-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  padding: 2rem;
+}
+
+.register-container {
+  max-width: 600px;
+  width: 100%;
+  background: white;
+  border-radius: 25px;
+  padding: 3rem;
+  box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.5s ease-out;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.register-icon {
+  text-align: center;
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.register-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1a202c;
+  margin-bottom: 0.5rem;
+}
+
+.register-subtitle {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #718096;
+  margin-bottom: 2rem;
+}
+
+.messages-container {
+  margin-bottom: 1.5rem;
+}
+
+.message {
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.message.error {
+  background: #fed7d7;
+  color: #c53030;
+  border: 2px solid #fc8181;
+}
+
+.message.success {
+  background: #c6f6d5;
+  color: #22543d;
+  border: 2px solid #68d391;
+}
+
+.message.info {
+  background: #bee3f8;
+  color: #2c5282;
+  border: 2px solid #63b3ed;
+}
+
+.info-display {
+  background: #f7fafc;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  border-left: 4px solid #48bb78;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.info-row:last-child {
+  margin-bottom: 0;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.info-value {
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.register-form {
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+  border: 3px solid #e2e8f0;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #48bb78;
+  box-shadow: 0 0 0 4px rgba(72, 187, 120, 0.2);
+}
+
+.form-group small {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #718096;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(72, 187, 120, 0.4);
+}
+
+.btn-submit:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 25px rgba(72, 187, 120, 0.6);
+}
+
+.security-note {
+  text-align: center;
+  background: #f7fafc;
+  padding: 1rem;
+  border-radius: 10px;
+  color: #4a5568;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .register-container {
+    padding: 2rem 1.5rem;
+  }
+  
+  .register-title {
+    font-size: 2rem;
+  }
+}
+</style>
+
+{% endblock %}

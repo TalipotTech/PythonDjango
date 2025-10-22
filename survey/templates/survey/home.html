@@ -2,35 +2,567 @@
 
 {% block content %}
 
-{% load static %}
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<div class="events-wrapper">
+  <div class="header-section">
+    <h1 class="page-title">📅 Quiz Events Portal</h1>
+    <p class="page-subtitle">Select an event to participate in the quiz</p>
+    
+    <div class="join-code-section">
+      <a href="{% url 'session_code_entry' %}" class="btn-join-code">
+        🔑 Join with Session Code
+      </a>
+    </div>
+    
+    <div class="header-actions">
+      {% if not request.session.attendee_id and not request.session.is_admin %}
+        <a href="{% url 'student_login' %}" class="btn-login">
+          � Student Login
+        </a>
+        <a href="{% url 'admin_login' %}" class="btn-admin">
+          � Admin Login
+        </a>
+      {% endif %}
+    </div>
+  </div>
 
-<div class="home-wrapper">
-  <h1 class="home-title">🎓 Welcome to the Course Selection Portal</h1>
-  <p class="home-description">Choose your class, take the quiz, and share your feedback. This portal supports multiple sessions and secure submissions.</p>
+  <!-- Current Events Section -->
+  {% if current_sessions %}
+  <div class="section-container">
+    <h2 class="section-title">🟢 Current Events (Live Now!)</h2>
+    <div class="events-grid">
+      {% for session in current_sessions %}
+      <div class="event-card current-event" data-countdown="{{ session.countdown_total_seconds }}" data-session-id="{{ session.id }}">
+        <div class="event-badge current">LIVE NOW</div>
+        <!-- Attendee count badge -->
+        <div class="attendee-count-badge">👥 {{ session.attendee_count }}</div>
+        <h3 class="event-title">{{ session.title }}</h3>
+        <p class="event-teacher">👨‍🏫 {{ session.teacher }}</p>
+        
+        <div class="event-time-info">
+          <p class="time-label">⏰ Ends at:</p>
+          <p class="time-value">{{ session.end_time|date:"M d, Y - g:i A" }}</p>
+        </div>
+        
+        <div class="countdown-timer" id="countdown-{{ session.id }}">
+          <div class="countdown-label">Time Remaining:</div>
+          <div class="countdown-display">
+            <div class="time-unit">
+              <span class="time-value" data-days>{{ session.countdown_days }}</span>
+              <span class="time-label">Days</span>
+            </div>
+            <div class="time-separator">:</div>
+            <div class="time-unit">
+              <span class="time-value" data-hours>{{ session.countdown_hours }}</span>
+              <span class="time-label">Hours</span>
+            </div>
+            <div class="time-separator">:</div>
+            <div class="time-unit">
+              <span class="time-value" data-minutes>{{ session.countdown_minutes }}</span>
+              <span class="time-label">Minutes</span>
+            </div>
+            <div class="time-separator">:</div>
+            <div class="time-unit">
+              <span class="time-value" data-seconds>{{ session.countdown_seconds }}</span>
+              <span class="time-label">Seconds</span>
+            </div>
+          </div>
+        </div>
+        
+        <a href="{% url 'request_session_code' session.id %}" class="btn-attend current">
+          Join Event Now →
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
 
-<div class="login-buttons">
-  <a href="{% url 'submit_response' %}" class="login-button login">
-    <i class="fas fa-user-graduate"></i> Register (Student)
-  </a>
+  <!-- Future Events Section -->
+  {% if future_sessions %}
+  <div class="section-container">
+    <h2 class="section-title">🔵 Upcoming Events</h2>
+    <div class="events-grid">
+      {% for session in future_sessions %}
+      <div class="event-card future-event" data-countdown="{{ session.countdown_total_seconds }}" data-session-id="{{ session.id }}">
+        <div class="event-badge future">UPCOMING</div>
+        <!-- Attendee count badge -->
+        <div class="attendee-count-badge">👥 {{ session.attendee_count }}</div>
+        <h3 class="event-title">{{ session.title }}</h3>
+        <p class="event-teacher">👨‍🏫 {{ session.teacher }}</p>
+        
+        <div class="event-time-info">
+          <p class="time-label">📅 Starts at:</p>
+          <p class="time-value">{{ session.start_time|date:"M d, Y - g:i A" }}</p>
+        </div>
+        
+        <div class="countdown-timer" id="countdown-{{ session.id }}">
+          <div class="countdown-label">Starts in:</div>
+          <div class="countdown-display">
+            <div class="time-unit">
+              <span class="time-value" data-days>{{ session.countdown_days }}</span>
+              <span class="time-label">Days</span>
+            </div>
+            <div class="time-separator">:</div>
+            <div class="time-unit">
+              <span class="time-value" data-hours>{{ session.countdown_hours }}</span>
+              <span class="time-label">Hours</span>
+            </div>
+            <div class="time-separator">:</div>
+            <div class="time-unit">
+              <span class="time-value" data-minutes>{{ session.countdown_minutes }}</span>
+              <span class="time-label">Minutes</span>
+            </div>
+            <div class="time-separator">:</div>
+            <div class="time-unit">
+              <span class="time-value" data-seconds>{{ session.countdown_seconds }}</span>
+              <span class="time-label">Seconds</span>
+            </div>
+          </div>
+        </div>
+        
+        <a href="{% url 'request_session_code' session.id %}" class="btn-attend future">
+          Register for Event →
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
 
-  <a href="{% url 'student_login' %}" class="login-button login">
-    <i class="fas fa-sign-in-alt"></i> Student Login
-  </a>
-
-<a href="{% url 'submit_review' %}" class="login-button login">
-  <i class="fas fa-comment-dots"></i> Submit Review
-</a> 
-
-  {% if request.session.attendee_id %}
-    <a href="{% url 'student_logout' %}" class="login-button">
-      🚪 Logout
-    </a>
+  <!-- No Events Message -->
+  {% if not current_sessions and not future_sessions %}
+  <div class="no-events">
+    <div class="no-events-icon">📭</div>
+    <h2>No Events Available</h2>
+    <p>There are no current or upcoming quiz events at this time.</p>
+    <p>Please check back later or contact your administrator.</p>
+  </div>
   {% endif %}
 
 </div>
 
+<script>
+// Countdown timer for all events
+document.addEventListener('DOMContentLoaded', function() {
+  const eventCards = document.querySelectorAll('.event-card');
+  
+  eventCards.forEach(card => {
+    let totalSeconds = parseInt(card.dataset.countdown);
+    const sessionId = card.dataset.sessionId;
+    const countdownElement = document.getElementById(`countdown-${sessionId}`);
     
-  </div>
-</div>
-{% endblock %} 
+    if (!countdownElement) return;
+    
+    const daysSpan = countdownElement.querySelector('[data-days]');
+    const hoursSpan = countdownElement.querySelector('[data-hours]');
+    const minutesSpan = countdownElement.querySelector('[data-minutes]');
+    const secondsSpan = countdownElement.querySelector('[data-seconds]');
+    
+    function updateCountdown() {
+      if (totalSeconds <= 0) {
+        // Reload page when countdown ends
+        location.reload();
+        return;
+      }
+      
+      const days = Math.floor(totalSeconds / 86400);
+      const hours = Math.floor((totalSeconds % 86400) / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      
+      daysSpan.textContent = days.toString().padStart(2, '0');
+      hoursSpan.textContent = hours.toString().padStart(2, '0');
+      minutesSpan.textContent = minutes.toString().padStart(2, '0');
+      secondsSpan.textContent = seconds.toString().padStart(2, '0');
+      
+      totalSeconds--;
+    }
+    
+    // Update immediately
+    updateCountdown();
+    
+    // Update every second
+    setInterval(updateCountdown, 1000);
+  });
+});
+</script>
+
+<style>
+.events-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+}
+
+.header-section {
+  text-align: center;
+  margin-bottom: 3rem;
+  position: relative;
+}
+
+.page-title {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #1a202c;
+  margin-bottom: 0.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.page-subtitle {
+  font-size: 1.2rem;
+  color: #4a5568;
+  margin-bottom: 1.5rem;
+}
+
+.join-code-section {
+  margin: 2rem 0;
+}
+
+.btn-join-code {
+  display: inline-block;
+  padding: 1rem 2.5rem;
+  background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
+  color: white;
+  border-radius: 15px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 4px 20px rgba(246, 173, 85, 0.4);
+  transition: all 0.3s ease;
+  animation: gentle-pulse 3s infinite;
+}
+
+.btn-join-code:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 25px rgba(246, 173, 85, 0.6);
+}
+
+@keyframes gentle-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.btn-logout, .btn-login, .btn-admin {
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-logout {
+  background: #f56565;
+  color: white;
+}
+
+.btn-logout:hover {
+  background: #e53e3e;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 101, 101, 0.4);
+}
+
+.btn-login {
+  background: #4299e1;
+  color: white;
+}
+
+.btn-login:hover {
+  background: #3182ce;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.4);
+}
+
+.btn-admin {
+  background: #9f7aea;
+  color: white;
+}
+
+.btn-admin:hover {
+  background: #805ad5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(159, 122, 234, 0.4);
+}
+
+.section-container {
+  margin-bottom: 3rem;
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 1.5rem;
+  padding-left: 0.5rem;
+  border-left: 5px solid #667eea;
+}
+
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 2rem;
+}
+
+.event-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.event-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.current-event {
+  border: 3px solid #48bb78;
+}
+
+.future-event {
+  border: 3px solid #4299e1;
+}
+
+.event-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+}
+
+.event-badge.current {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+.event-badge.future {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  color: white;
+}
+
+.session-code-badge {
+  position: absolute;
+  top: 3.5rem;
+  right: 1rem;
+  background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.9; }
+}
+
+.event-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 0.5rem;
+  padding-right: 6rem;
+}
+
+.event-teacher {
+  font-size: 1rem;
+  color: #4a5568;
+  margin-bottom: 1.5rem;
+}
+
+.event-time-info {
+  background: #f7fafc;
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.time-label {
+  font-size: 0.875rem;
+  color: #718096;
+  margin-bottom: 0.25rem;
+}
+
+.time-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.countdown-timer {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 1.5rem;
+  border-radius: 15px;
+  margin-bottom: 1.5rem;
+  color: white;
+}
+
+.countdown-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.countdown-display {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.time-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 0.75rem;
+  border-radius: 10px;
+  min-width: 60px;
+}
+
+.time-unit .time-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+}
+
+.time-unit .time-label {
+  font-size: 0.7rem;
+  opacity: 0.8;
+  margin-top: 0.25rem;
+}
+
+.time-separator {
+  font-size: 1.5rem;
+  font-weight: 700;
+  opacity: 0.7;
+}
+
+.btn-attend {
+  display: block;
+  width: 100%;
+  padding: 1rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-align: center;
+  text-decoration: none;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.btn-attend.current {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
+}
+
+.btn-attend.current:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(72, 187, 120, 0.6);
+}
+
+.btn-attend.future {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  box-shadow: 0 4px 15px rgba(66, 153, 225, 0.4);
+}
+
+.btn-attend.future:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(66, 153, 225, 0.6);
+}
+
+.no-events {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.no-events-icon {
+  font-size: 5rem;
+  margin-bottom: 1rem;
+}
+
+.no-events h2 {
+  font-size: 2rem;
+  color: #2d3748;
+  margin-bottom: 1rem;
+}
+
+.no-events p {
+  font-size: 1.1rem;
+  color: #718096;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .events-wrapper {
+    padding: 1rem;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+  }
+  
+  .events-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .countdown-display {
+    gap: 0.25rem;
+  }
+  
+  .time-unit {
+    min-width: 50px;
+    padding: 0.5rem;
+  }
+  
+  .time-unit .time-value {
+    font-size: 1.25rem;
+  }
+  
+  .time-separator {
+    font-size: 1rem;
+  }
+}
+
+/* Attendee count badge on event cards */
+.attendee-count-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+}
+
+</style>
+
+{% endblock %}

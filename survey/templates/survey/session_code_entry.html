@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+<div class="code-entry-wrapper">
+  <div class="code-entry-container">
+    <div class="code-icon">🔑</div>
+    
+    <h1 class="code-title">Enter Session Code</h1>
+    <p class="code-subtitle">Enter the unique code provided by your instructor</p>
+    
+    {% if messages %}
+      <div class="messages-container">
+        {% for message in messages %}
+          <div class="message {{ message.tags }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    
+    <form method="post" class="code-form">
+      {% csrf_token %}
+      
+      <div class="form-group">
+        <label for="session_code">Session Code</label>
+        <input 
+          type="text" 
+          id="session_code" 
+          name="session_code" 
+          placeholder="e.g., ABC12345"
+          maxlength="10"
+          required
+          autofocus
+          style="text-transform: uppercase;"
+        >
+        <small>Enter the 8-character code (letters and numbers)</small>
+      </div>
+      
+      <button type="submit" class="btn-submit">
+        ✅ Join Session
+      </button>
+    </form>
+    
+    <div class="help-section">
+      <p>💡 <strong>Don't have a code?</strong></p>
+      <p>Contact your instructor or check your invitation email for the session code.</p>
+      <a href="{% url 'home' %}" class="btn-back">← Back to Events</a>
+    </div>
+  </div>
+</div>
+
+<style>
+.code-entry-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
+  padding: 2rem;
+}
+
+.code-entry-container {
+  max-width: 550px;
+  width: 100%;
+  background: white;
+  border-radius: 25px;
+  padding: 3rem;
+  box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.code-icon {
+  text-align: center;
+  font-size: 5rem;
+  margin-bottom: 1.5rem;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+.code-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1a202c;
+  margin-bottom: 0.5rem;
+}
+
+.code-subtitle {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #718096;
+  margin-bottom: 2rem;
+}
+
+.messages-container {
+  margin-bottom: 1.5rem;
+}
+
+.message {
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.message.error {
+  background: #fed7d7;
+  color: #c53030;
+  border: 2px solid #fc8181;
+}
+
+.message.success {
+  background: #c6f6d5;
+  color: #22543d;
+  border: 2px solid #68d391;
+}
+
+.message.info {
+  background: #bee3f8;
+  color: #2c5282;
+  border: 2px solid #63b3ed;
+}
+
+.code-form {
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 1.25rem;
+  font-size: 1.5rem;
+  border: 3px solid #e2e8f0;
+  border-radius: 12px;
+  text-align: center;
+  letter-spacing: 3px;
+  font-weight: 700;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #f6ad55;
+  box-shadow: 0 0 0 4px rgba(246, 173, 85, 0.2);
+}
+
+.form-group small {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #718096;
+  text-align: center;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(72, 187, 120, 0.4);
+}
+
+.btn-submit:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 25px rgba(72, 187, 120, 0.6);
+}
+
+.help-section {
+  text-align: center;
+  background: #f7fafc;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-top: 2rem;
+}
+
+.help-section p {
+  margin: 0.5rem 0;
+  color: #4a5568;
+}
+
+.btn-back {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: #e2e8f0;
+  color: #2d3748;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+  background: #cbd5e0;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .code-entry-container {
+    padding: 2rem 1.5rem;
+  }
+  
+  .code-title {
+    font-size: 2rem;
+  }
+}
+</style>
+
+{% endblock %}

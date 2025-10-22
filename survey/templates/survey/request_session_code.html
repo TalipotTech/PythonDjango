@@ -1,0 +1,335 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="email-request-wrapper">
+  <div class="email-request-container">
+    <div class="request-icon">📧</div>
+    
+    <h1 class="request-title">Join {{session.title}}</h1>
+    <p class="request-subtitle">Teacher: <strong>{{ session.teacher }}</strong></p>
+    
+    {% if messages %}
+      <div class="messages-container">
+        {% for message in messages %}
+          <div class="message {{ message.tags }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    
+    <!-- Step 1: Enter Email -->
+    {% if not code_sent %}
+    <div class="step-container">
+      <div class="step-badge">Step 1 of 2</div>
+      <h2>Enter Your Email Address</h2>
+      <p>We'll send your session code to this email</p>
+      
+      <form method="post" action="{% url 'request_session_code' session.id %}" class="email-form">
+        {% csrf_token %}
+        
+        <div class="form-group">
+          <label for="email">📧 Email Address</label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            placeholder="your.email@example.com"
+            value="{{ email }}"
+            required
+            autofocus
+          >
+        </div>
+        
+        <button type="submit" name="request_code" class="btn-submit">
+          📬 Send Session Code to Email
+        </button>
+      </form>
+    </div>
+    {% endif %}
+    
+    <!-- Step 2: Enter Code -->
+    {% if code_sent %}
+    <div class="step-container success">
+      <div class="step-badge">Step 2 of 2</div>
+      <div class="success-icon">✅</div>
+      <h2>Code Sent Successfully!</h2>
+      <p>Check your email: <strong>{{ email }}</strong></p>
+      <p class="email-note">📬 We've sent the session code to your email address</p>
+      
+      <form method="post" action="{% url 'verify_session_code' session.id %}" class="code-form">
+        {% csrf_token %}
+        <input type="hidden" name="email" value="{{ email }}">
+        
+        <div class="form-group">
+          <label for="session_code">🔑 Enter Session Code from Email</label>
+          <input 
+            type="text" 
+            id="session_code" 
+            name="session_code" 
+            placeholder="Enter 8-character code"
+            maxlength="8"
+            style="text-transform: uppercase; letter-spacing: 2px; font-size: 1.5rem; text-align: center;"
+            required
+            autofocus
+          >
+        </div>
+        
+        <button type="submit" class="btn-submit">
+          🚀 Join Session
+        </button>
+      </form>
+      
+      <div class="resend-section">
+        <p>Didn't receive the code?</p>
+        <form method="post" action="{% url 'request_session_code' session.id %}" style="display: inline;">
+          {% csrf_token %}
+          <input type="hidden" name="email" value="{{ email }}">
+          <button type="submit" name="request_code" class="btn-resend">
+            🔄 Resend Code
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+    
+    <div class="back-link">
+      <a href="{% url 'home' %}">← Back to Events</a>
+    </div>
+  </div>
+</div>
+
+<style>
+.email-request-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+}
+
+.email-request-container {
+  max-width: 600px;
+  width: 100%;
+  background: white;
+  border-radius: 25px;
+  padding: 3rem;
+  box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.request-icon {
+  text-align: center;
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.request-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1a202c;
+  margin-bottom: 0.5rem;
+}
+
+.request-subtitle {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #718096;
+  margin-bottom: 2rem;
+}
+
+.messages-container {
+  margin-bottom: 1.5rem;
+}
+
+.message {
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.message.error {
+  background: #fed7d7;
+  color: #c53030;
+  border: 2px solid #fc8181;
+}
+
+.message.success {
+  background: #c6f6d5;
+  color: #22543d;
+  border: 2px solid #68d391;
+}
+
+.message.info {
+  background: #bee3f8;
+  color: #2c5282;
+  border: 2px solid #63b3ed;
+}
+
+.step-container {
+  background: #f7fafc;
+  padding: 2rem;
+  border-radius: 15px;
+  margin-bottom: 1.5rem;
+}
+
+.step-container.success {
+  background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
+}
+
+.step-badge {
+  display: inline-block;
+  background: #667eea;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.step-container h2 {
+  font-size: 1.75rem;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.step-container p {
+  color: #4a5568;
+  margin-bottom: 1.5rem;
+}
+
+.success-icon {
+  text-align: center;
+  font-size: 3rem;
+  margin: 1rem 0;
+}
+
+.email-note {
+  background: white;
+  padding: 1rem;
+  border-radius: 10px;
+  border-left: 4px solid #48bb78;
+  font-weight: 600;
+  color: #22543d;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+  border: 3px solid #e2e8f0;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-submit:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+}
+
+.resend-section {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.resend-section p {
+  margin-bottom: 0.5rem;
+  color: #4a5568;
+}
+
+.btn-resend {
+  background: #f6ad55;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-resend:hover {
+  background: #ed8936;
+  transform: translateY(-2px);
+}
+
+.back-link {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.back-link a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.back-link a:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .email-request-container {
+    padding: 2rem 1.5rem;
+  }
+  
+  .request-title {
+    font-size: 2rem;
+  }
+}
+</style>
+
+{% endblock %}

@@ -13,6 +13,11 @@
   <div class="details-card">
     <h2>{{ session.title }}</h2>
     <div class="details-grid">
+      <div class="detail-item session-code-display">
+        <span class="label">🔑 Session Code:</span>
+        <span class="value code-value">{{ session.session_code }}</span>
+        <button class="btn-copy" onclick="copySessionCode('{{ session.session_code }}')">📋 Copy</button>
+      </div>
       <div class="detail-item">
         <span class="label">👨‍🏫 Teacher:</span>
         <span class="value">{{ session.teacher }}</span>
@@ -31,6 +36,61 @@
       </div>
     </div>
   </div>
+
+  <script>
+  function copySessionCode(code) {
+    navigator.clipboard.writeText(code).then(function() {
+      alert('Session code copied: ' + code);
+    }, function() {
+      alert('Failed to copy code');
+    });
+  }
+  </script>
+
+  <style>
+  .session-code-display {
+    background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
+    padding: 1.5rem !important;
+    border-radius: 12px;
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .session-code-display .label {
+    color: white;
+    font-size: 1.2rem;
+  }
+  
+  .code-value {
+    background: white;
+    color: #ed8936;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    font-family: 'Courier New', monospace;
+  }
+  
+  .btn-copy {
+    background: white;
+    color: #ed8936;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-copy:hover {
+    background: #fff5ec;
+    transform: scale(1.05);
+  }
+  </style>
 
   <div class="stats-section">
     <h3>📈 Session Statistics</h3>

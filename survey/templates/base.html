@@ -3,31 +3,63 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Interactive Quiz and Survey Platform for Educational Institutions">
+    <meta name="theme-color" content="#667eea">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
     <title>{% block title %}Survey App{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=4.0">
+    {% block extra_head %}{% endblock %}
+    <style>
+    /* Header layout: three columns with centered app name */
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .header-left { justify-self: start; display:flex; align-items:center; gap:1rem; }
+    .header-center { justify-self: center; text-align:center; }
+    .header-right { justify-self: end; }
+
+    .app-name a { color: white; text-decoration: none; font-weight: 800; font-size: 1.1rem; }
+
+    header nav a { color: white; margin-left: 0.75rem; text-decoration: none; }
+
+    .btn-back { background: rgba(255,255,255,0.08); border: none; color: white; padding: 0.5rem 0.75rem; border-radius: 8px; }
+    .btn-back:hover { opacity: 0.95; }
+    </style>
 </head>
 <body>
     <header>
-        <div class="app-name">Survey App</div>
-        <nav>
-            <a href="{% url 'home' %}" title="Home">🏠 Home</a>
-            
-            {% if request.session.is_admin %}
-                <!-- Admin Navigation -->
-                <a href="{% url 'admin_dashboard' %}" title="Dashboard">📊 Dashboard</a>
-                <a href="{% url 'admin_logout' %}" title="Logout">� Logout (Admin)</a>
-            {% elif request.session.attendee_id %}
-                <!-- Student Navigation -->
-                <a href="{% url 'student_dashboard' %}" title="My Dashboard">📚 My Dashboard</a>
-                <a href="{% url 'quiz' %}" title="Quiz">📝 Quiz</a>
-                <a href="{% url 'student_logout' %}" title="Logout">🚪 Logout</a>
-            {% else %}
-                <!-- Guest Navigation -->
-                <a href="{% url 'student_login' %}" title="Student Login">👤 Student Login</a>
-                <a href="{% url 'admin_login' %}" title="Admin Login">🔐 Admin Login</a>
-                <a href="{% url 'submit_response' %}" title="Register">📝 Register</a>
-            {% endif %}
-        </nav>
+        <div class="header-left">
+            <button onclick="history.back()" class="btn-back" title="Go Back">← Back</button>
+        </div>
+        <div class="header-center">
+            <div class="app-name">
+                <a href="{% url 'home' %}">Survey App</a>
+            </div>
+        </div>
+        <div class="header-right">
+            <nav>
+                {% if request.session.is_admin %}
+                    <!-- Admin Navigation -->
+                    <a href="{% url 'admin_logout' %}" title="Logout">🔒 Logout</a>
+                {% elif request.session.attendee_id %}
+                    <!-- Student Navigation -->
+                    <a href="{% url 'student_logout' %}" title="Logout">🚪 Logout</a>
+                {% endif %}
+            </nav>
+        </div>
     </header>
 
     <main>
@@ -45,7 +77,66 @@
     </main>
 
     <footer>
-        <p>&copy; {{ year|default:2025 }} Survey App</p>
+        <div class="footer-content">
+            <p>&copy; {{ year|default:2025 }} Survey App - All Rights Reserved</p>
+            <nav class="footer-nav">
+                <a href="{% url 'home' %}">Home</a>
+                <a href="{% url 'admin_login' %}">Admin</a>
+                <a href="{% url 'student_login' %}">Student Login</a>
+            </nav>
+        </div>
     </footer>
+
+    <!-- Back to Top Button -->
+    <button id="back-to-top" class="back-to-top" title="Back to top">↑</button>
+
+    <script>
+    // Back to Top functionality
+    const backToTopBtn = document.getElementById('back-to-top');
+    
+    window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 300) {
+            backToTopBtn.classList.add('show');
+        } else {
+            backToTopBtn.classList.remove('show');
+        }
+    });
+    
+    backToTopBtn.addEventListener('click', function() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Confirm before delete
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('a[href*="delete"], button[name*="delete"]').forEach(function(element) {
+            element.addEventListener('click', function(e) {
+                if (!confirm('⚠️ Are you sure you want to delete this? This action cannot be undone.')) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        });
+
+        // Add loading state to forms on submit
+        document.querySelectorAll('form').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                // Don't add loading if form is invalid
+                if (!form.checkValidity()) {
+                    return;
+                }
+                
+                // Add loading class
+                form.classList.add('submitting');
+                
+                // Disable submit button
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('btn-loading');
+                }
+            });
+        });
+    });
+    </script>
 </body>
 </html>

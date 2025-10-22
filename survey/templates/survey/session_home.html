@@ -95,9 +95,51 @@
         </div>
       </div>
 
-      <a href="{% url 'quiz' %}" class="btn-start-quiz">
-        <span class="btn-icon">🚀</span> Start Quiz Now
-      </a>
+      {% if progress_stats %}
+      <div class="quiz-progress-card">
+        <h3>📊 Your Progress</h3>
+        <div class="progress-stats">
+          <div class="stat-item">
+            <div class="stat-value">{{ progress_stats.total }}</div>
+            <div class="stat-label">Total Questions</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value answered">{{ progress_stats.answered }}</div>
+            <div class="stat-label">Answered</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value pending">{{ progress_stats.pending }}</div>
+            <div class="stat-label">Pending</div>
+          </div>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar" style="width: {{ progress_stats.percentage }}%">
+            {{ progress_stats.percentage }}%
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if quiz_progress.is_fully_completed %}
+        <div class="completion-message">
+          <span class="check-icon">✅</span>
+          <div>
+            <strong>Quiz Completed!</strong>
+            <p>You have answered all questions for this session.</p>
+          </div>
+        </div>
+        <a href="{% url 'student_dashboard' %}" class="btn-secondary">
+          <span class="btn-icon">📊</span> View Your Results
+        </a>
+      {% elif progress_stats and progress_stats.answered > 0 %}
+        <a href="{% url 'quiz' %}" class="btn-start-quiz continue">
+          <span class="btn-icon">▶️</span> Continue Quiz ({{ progress_stats.pending }} questions remaining)
+        </a>
+      {% else %}
+        <a href="{% url 'quiz' %}" class="btn-start-quiz">
+          <span class="btn-icon">🚀</span> Start Quiz Now
+        </a>
+      {% endif %}
 
       <p class="info-text">
         ⚠️ Make sure to complete the quiz before the time runs out!
@@ -381,6 +423,138 @@
 
   .countdown-value {
     font-size: 2rem;
+  }
+}
+
+.quiz-progress-card {
+  background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+  border: 2px solid #667eea;
+  border-radius: 15px;
+  padding: 25px;
+  margin: 20px 0;
+}
+
+.quiz-progress-card h3 {
+  margin: 0 0 20px 0;
+  color: #374151;
+  font-size: 1.3rem;
+}
+
+.progress-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.stat-item {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #667eea;
+}
+
+.stat-value.answered {
+  color: #10b981;
+}
+
+.stat-value.pending {
+  color: #f59e0b;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 5px;
+}
+
+.progress-bar-container {
+  background: #e5e7eb;
+  height: 30px;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: width 0.3s ease;
+}
+
+.completion-message {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: #d1fae5;
+  border: 2px solid #10b981;
+  padding: 20px;
+  border-radius: 12px;
+  margin: 20px 0;
+}
+
+.check-icon {
+  font-size: 2.5rem;
+}
+
+.completion-message strong {
+  display: block;
+  color: #065f46;
+  font-size: 1.2rem;
+  margin-bottom: 5px;
+}
+
+.completion-message p {
+  margin: 0;
+  color: #059669;
+}
+
+.btn-start-quiz.continue {
+  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+}
+
+.btn-start-quiz.continue:hover {
+  background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%);
+}
+
+.btn-secondary {
+  display: inline-block;
+  padding: 15px 40px;
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 50px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+}
+
+.btn-secondary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
+}
+
+@media (max-width: 768px) {
+  .session-home-container {
+    padding: 10px;
+  }
+
+  .progress-stats {
+    grid-template-columns: 1fr;
   }
 }
 </style>

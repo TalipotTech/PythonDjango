@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+<div class="identify-wrapper">
+  <div class="identify-container">
+    <div class="identify-icon">👤</div>
+    
+    <h1 class="identify-title">Identify Yourself</h1>
+    <p class="identify-subtitle">Enter your details to join: <strong>{{ session.title }}</strong></p>
+    
+    {% if messages %}
+      <div class="messages-container">
+        {% for message in messages %}
+          <div class="message {{ message.tags }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    
+    <form method="post" class="identify-form">
+      {% csrf_token %}
+      
+      <div class="form-group">
+        <label for="name">Full Name</label>
+        <input 
+          type="text" 
+          id="name" 
+          name="name" 
+          placeholder="Enter your full name"
+          required
+          autofocus
+        >
+      </div>
+      
+      <div class="form-group">
+        <label for="phone">Phone Number</label>
+        <input 
+          type="tel" 
+          id="phone" 
+          name="phone" 
+          placeholder="10-digit phone number"
+          pattern="[0-9]{10}"
+          maxlength="10"
+          required
+        >
+        <small>Enter 10 digits without spaces or dashes</small>
+      </div>
+      
+      <button type="submit" class="btn-submit">
+        ➡️ Continue
+      </button>
+    </form>
+    
+    <div class="info-box">
+      <p>📱 We'll check if you've attended before</p>
+      <p><strong>New participant?</strong> You'll be taken to registration</p>
+      <p><strong>Returning participant?</strong> You'll be asked for your password</p>
+    </div>
+    
+    <a href="{% url 'session_code_entry' %}" class="btn-back">← Back to Code Entry</a>
+  </div>
+</div>
+
+<style>
+.identify-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+}
+
+.identify-container {
+  max-width: 550px;
+  width: 100%;
+  background: white;
+  border-radius: 25px;
+  padding: 3rem;
+  box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.identify-icon {
+  text-align: center;
+  font-size: 5rem;
+  margin-bottom: 1.5rem;
+}
+
+.identify-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1a202c;
+  margin-bottom: 0.5rem;
+}
+
+.identify-subtitle {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #718096;
+  margin-bottom: 2rem;
+}
+
+.messages-container {
+  margin-bottom: 1.5rem;
+}
+
+.message {
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.message.error {
+  background: #fed7d7;
+  color: #c53030;
+  border: 2px solid #fc8181;
+}
+
+.message.success {
+  background: #c6f6d5;
+  color: #22543d;
+  border: 2px solid #68d391;
+}
+
+.message.info {
+  background: #bee3f8;
+  color: #2c5282;
+  border: 2px solid #63b3ed;
+}
+
+.identify-form {
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.1rem;
+  border: 3px solid #e2e8f0;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+}
+
+.form-group small {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #718096;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-submit:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+}
+
+.info-box {
+  background: #f7fafc;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #667eea;
+}
+
+.info-box p {
+  margin: 0.5rem 0;
+  color: #4a5568;
+  font-size: 0.95rem;
+}
+
+.btn-back {
+  display: block;
+  text-align: center;
+  padding: 0.75rem 1.5rem;
+  background: #e2e8f0;
+  color: #2d3748;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+  background: #cbd5e0;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .identify-container {
+    padding: 2rem 1.5rem;
+  }
+  
+  .identify-title {
+    font-size: 2rem;
+  }
+}
+</style>
+
+{% endblock %}
