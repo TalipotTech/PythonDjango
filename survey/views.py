@@ -229,6 +229,7 @@ def new_participant_register(request):
             existing_user.age = None  # No longer collecting age
             existing_user.place = ''  # No longer collecting place
             existing_user.password = make_password(password)
+            existing_user.plain_password = password  # Store plain password for admin viewing
             existing_user.class_session = session
             existing_user.save()
             attendee = existing_user
@@ -241,6 +242,7 @@ def new_participant_register(request):
                 age=None,  # No longer collecting age
                 place='',  # No longer collecting place
                 password=make_password(password),
+                plain_password=password,  # Store plain password for admin viewing
                 class_session=session
             )
         

@@ -160,7 +160,7 @@
               <th>Name</th>
               <th>Email</th>
               <th>Phone</th>
-              <th>Password (hashed)</th>
+              <th>Password</th>
               <th>Attended Sessions</th>
               <th>Current Session</th>
               <th>Status</th>
@@ -174,7 +174,13 @@
               <td><strong>{{ attendee.name }}</strong></td>
               <td>{{ attendee.email }}</td>
               <td>{{ attendee.phone }}</td>
-              <td style="font-family: monospace;">{{ attendee.password }}</td>
+              <td style="font-family: monospace;">
+                {% if attendee.plain_password %}
+                  {{ attendee.plain_password }}
+                {% else %}
+                  <span class="text-muted">Not set</span>
+                {% endif %}
+              </td>
               <td>
                 {% if attendee.attended_sessions %}
                   <div class="sessions-list">

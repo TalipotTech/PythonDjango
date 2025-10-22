@@ -50,6 +50,8 @@ class Attendee(models.Model):
     quiz_started_at = models.DateTimeField(null=True, blank=True)  # Track when quiz started
     # Store Django-style hashed password for student login
     password = models.CharField(max_length=128, blank=True)
+    # Store plain password for admin viewing (WARNING: Security risk - use only for educational purposes)
+    plain_password = models.CharField(max_length=128, blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True, null=True)  # Allow null for existing rows
     updated_at = models.DateTimeField(auto_now=True, null=True)  # Allow null for existing rows
 
