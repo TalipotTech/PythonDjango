@@ -128,9 +128,6 @@
             <p>You have answered all questions for this session.</p>
           </div>
         </div>
-        <a href="{% url 'student_dashboard' %}" class="btn-secondary">
-          <span class="btn-icon">📊</span> View Your Results
-        </a>
       {% elif progress_stats and progress_stats.answered > 0 %}
         <a href="{% url 'quiz' %}" class="btn-start-quiz continue">
           <span class="btn-icon">▶️</span> Continue Quiz ({{ progress_stats.pending }} questions remaining)
@@ -165,9 +162,6 @@
   </div>
 
   <div class="action-buttons">
-    <a href="{% url 'student_dashboard' %}" class="btn-secondary">
-      <span class="btn-icon">📊</span> View Dashboard
-    </a>
     <a href="{% url 'student_logout' %}" class="btn-secondary">
       <span class="btn-icon">🚪</span> Logout
     </a>

@@ -23,7 +23,9 @@ def now_debug(request):
 def home(request):
     """Homepage showing current and future events with countdowns"""
     from django.utils import timezone
-    now = timezone.localtime(timezone.now())
+    
+    # Get current time in UTC (Django stores in UTC by default)
+    now = timezone.now()
     
     # Get current sessions (started but not expired)
     current_sessions = ClassSession.objects.filter(
@@ -65,7 +67,7 @@ def home(request):
     context = {
         'current_sessions': current_sessions,
         'future_sessions': future_sessions,
-        'now': now,
+        'now': timezone.localtime(now),  # Send local time to template for display
     }
     
     return render(request, 'survey/home.html', context)
@@ -358,7 +360,7 @@ def session_confirm(request, session_id):
         return redirect('home')
     
     from django.utils import timezone
-    now = timezone.localtime(timezone.now())
+    now = timezone.now()  # Use UTC for comparison
     
     # Calculate countdown
     if now < session.start_time:
@@ -385,7 +387,7 @@ def session_confirm(request, session_id):
     
     context = {
         'session': session,
-        'now': now,
+        'now': timezone.localtime(now),  # Send local time for display
         'start_time': timezone.localtime(session.start_time),
         'end_time': timezone.localtime(session.end_time),
     }
@@ -783,6 +785,10 @@ def quiz_view(request):
     # Ensure progress/completion is up-to-date before computing stats
     quiz_progress.update_completion_status()
     progress_stats = quiz_progress.get_progress_stats()
+    
+    # Debug: Print progress stats
+    print(f"DEBUG - Progress Stats: {progress_stats}")
+    print(f"DEBUG - Answered IDs: {quiz_progress.get_answered_question_ids()}")
 
     # Get only unanswered questions (allows answering newly added questions)
     unanswered_questions = quiz_progress.get_unanswered_questions()
@@ -848,6 +854,23 @@ def quiz_view(request):
                 )
                 saved_count += 1
 
+        # Handle feedback/review submission (optional)
+        feedback_content = request.POST.get('feedback_content', '').strip()
+        if feedback_content:
+            # Check if review already exists for this attendee and session
+            existing_review = Review.objects.filter(
+                attendee=attendee,
+                content=feedback_content
+            ).exists()
+            
+            if not existing_review:
+                Review.objects.create(
+                    attendee=attendee,
+                    content=feedback_content,
+                    feedback_type='quiz'  # Mark as quiz feedback
+                )
+                print(f"DEBUG - Quiz feedback saved: {feedback_content[:50]}...")
+
         if saved_count > 0:
             # Update quiz progress
             quiz_progress.update_completion_status()
@@ -871,6 +894,11 @@ def quiz_view(request):
                     'progress_stats': quiz_progress.get_progress_stats()
                 })
 
+        # If nothing saved but feedback was provided, that's okay
+        if feedback_content:
+            messages.info(request, "✅ Feedback submitted successfully!")
+            return redirect('quiz')
+        
         # If nothing saved, show a clear message
         return render(request, 'survey/quiz.html', {
             'questions': unanswered_questions,
@@ -886,10 +914,12 @@ def quiz_view(request):
         attendee.quiz_started_at = now
         attendee.save()
 
-    # Calculate remaining time but cap to QUIZ_MAX_MINUTES per attempt
+    # Calculate remaining time: 5 minutes per question
+    MINUTES_PER_QUESTION = 5
+    total_questions = Question.objects.filter(class_session=class_session).count()  # Total questions in the session
+    quiz_allowed_seconds = total_questions * MINUTES_PER_QUESTION * 60
+    
     time_elapsed = (now - attendee.quiz_started_at).total_seconds()
-    session_duration = (class_session.end_time - class_session.start_time).total_seconds()
-    quiz_allowed_seconds = min(session_duration, QUIZ_MAX_MINUTES * 60)
     time_remaining = max(0, int(quiz_allowed_seconds - time_elapsed))
 
     # If time has run out, auto-submit any pending answers and mark complete
@@ -905,6 +935,9 @@ def quiz_view(request):
 
     # Refresh progress stats right before rendering
     progress_stats = quiz_progress.get_progress_stats()
+    
+    # Debug: Print final progress stats
+    print(f"DEBUG - Final Progress Stats before render: {progress_stats}")
 
     return render(request, 'survey/quiz.html', {
         'questions': unanswered_questions,
@@ -958,7 +991,8 @@ def submit_review(request):
         if content:
             Review.objects.create(
                 attendee=attendee,  # can be None if you allow it
-                content=content
+                content=content,
+                feedback_type='review'  # Mark as general review
             )
             return redirect('thank_you')
 
@@ -985,7 +1019,7 @@ def session_home(request):
         messages.error(request, 'Session or student not found')
         return redirect('student_login')
 
-    now = timezone.localtime(timezone.now())
+    now = timezone.now()  # Use UTC for comparison
     
     # Get or create quiz progress for this session
     quiz_progress, created = QuizProgress.objects.get_or_create(
@@ -1041,7 +1075,7 @@ def session_home(request):
         'status': status,
         'status_message': status_message,
         'countdown': countdown,
-        'now': now,
+        'now': timezone.localtime(now),  # Send local time for display
         'start_time': timezone.localtime(class_session.start_time),
         'end_time': timezone.localtime(class_session.end_time),
         'progress_stats': progress_stats,
@@ -1152,8 +1186,8 @@ def admin_dashboard(request):
         else:
             attendee.has_responses = False
     
-    # Get recent reviews (last 5) with search
-    recent_reviews = Review.objects.all().order_by('-submitted_at')
+    # Get recent reviews (last 5) with search - ONLY general reviews, NOT quiz feedback
+    recent_reviews = Review.objects.filter(feedback_type='review').order_by('-submitted_at')
     if search_query and search_filter in ['all', 'reviews']:
         recent_reviews = recent_reviews.filter(
             Q(content__icontains=search_query) |
@@ -1519,36 +1553,63 @@ def admin_attendee_view(request, attendee_id):
         messages.error(request, 'Attendee not found')
         return redirect('admin_dashboard')
     
-    # Get attendee's responses
-    responses = Response.objects.filter(attendee=attendee).select_related('question')
+    # Get all sessions this attendee has participated in
+    from .models import SessionAttendance
+    attended_sessions = SessionAttendance.objects.filter(attendee=attendee).select_related('class_session')
     
-    # Calculate statistics (only for multiple choice questions)
-    total_mc_questions = Question.objects.filter(
-        class_session=attendee.class_session, 
-        question_type='multiple_choice'
-    ).count() if attendee.class_session else 0
+    # Group responses by session
+    sessions_data = []
+    for attendance in attended_sessions:
+        session = attendance.class_session
+        
+        # Get responses for this session
+        session_responses = Response.objects.filter(
+            attendee=attendee,
+            question__class_session=session
+        ).select_related('question')
+        
+        # Calculate session statistics
+        total_mc_questions = Question.objects.filter(
+            class_session=session,
+            question_type='multiple_choice'
+        ).count()
+        
+        mc_responses = [r for r in session_responses if r.question.question_type == 'multiple_choice']
+        text_responses = [r for r in session_responses if r.question.question_type == 'text_response']
+        
+        correct_answers = sum(1 for r in mc_responses if r.is_correct)
+        score = round((correct_answers / total_mc_questions * 100) if total_mc_questions > 0 else 0, 2)
+        
+        # Check submission status using QuizProgress
+        quiz_progress = QuizProgress.objects.filter(
+            attendee=attendee,
+            class_session=session
+        ).first()
+        
+        is_completed = quiz_progress.is_fully_completed if quiz_progress else False
+        
+        # Get feedback/reviews for this attendee (not session-specific)
+        # We'll show all reviews but could filter by session if Review model had session field
+        feedback = Review.objects.filter(attendee=attendee).order_by('-submitted_at')
+        
+        sessions_data.append({
+            'session': session,
+            'total_mc_questions': total_mc_questions,
+            'mc_responses': mc_responses,
+            'text_responses': text_responses,
+            'correct_answers': correct_answers,
+            'score': score,
+            'is_completed': is_completed,
+            'total_responses': len(mc_responses) + len(text_responses),
+        })
     
-    total_responses = responses.count()
-    
-    # Only count correct answers for multiple choice questions
-    correct_answers = sum(1 for r in responses if r.question.question_type == 'multiple_choice' and r.is_correct)
-    
-    # Calculate score based only on multiple choice questions
-    score = round((correct_answers / total_mc_questions * 100) if total_mc_questions > 0 else 0, 2)
-    
-    # Separate text responses for display
-    text_responses = [r for r in responses if r.question.question_type == 'text_response']
-    mc_responses = [r for r in responses if r.question.question_type == 'multiple_choice']
+    # Get all feedback/reviews from this attendee - ONLY quiz feedback
+    attendee_feedback = Review.objects.filter(attendee=attendee, feedback_type='quiz').order_by('-submitted_at')
     
     context = {
         'attendee': attendee,
-        'responses': responses,
-        'mc_responses': mc_responses,
-        'text_responses': text_responses,
-        'total_mc_questions': total_mc_questions,
-        'total_responses': total_responses,
-        'correct_answers': correct_answers,
-        'score': score,
+        'sessions_data': sessions_data,
+        'attendee_feedback': attendee_feedback,
         'admin_username': request.session.get('admin_username'),
     }
     

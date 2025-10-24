@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     
-    <title>{% block title %}Survey App{% endblock %}</title>
+    <title>{% block title %}Ensate Workshops{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=4.0">
     {% block extra_head %}{% endblock %}
     <style>
@@ -34,19 +34,15 @@
     .app-name a { color: white; text-decoration: none; font-weight: 800; font-size: 1.1rem; }
 
     header nav a { color: white; margin-left: 0.75rem; text-decoration: none; }
-
-    .btn-back { background: rgba(255,255,255,0.08); border: none; color: white; padding: 0.5rem 0.75rem; border-radius: 8px; }
-    .btn-back:hover { opacity: 0.95; }
     </style>
 </head>
 <body>
     <header>
         <div class="header-left">
-            <button onclick="history.back()" class="btn-back" title="Go Back">← Back</button>
         </div>
         <div class="header-center">
             <div class="app-name">
-                <a href="{% url 'home' %}">Survey App</a>
+                <a href="{% url 'home' %}">Ensate Workshops</a>
             </div>
         </div>
         <div class="header-right">
@@ -78,11 +74,10 @@
 
     <footer>
         <div class="footer-content">
-            <p>&copy; {{ year|default:2025 }} Survey App - All Rights Reserved</p>
+            <p>&copy; {{ year|default:2025 }} Ensate Workshops - Empowering Innovation Through Knowledge</p>
             <nav class="footer-nav">
                 <a href="{% url 'home' %}">Home</a>
                 <a href="{% url 'admin_login' %}">Admin</a>
-                <a href="{% url 'student_login' %}">Student Login</a>
             </nav>
         </div>
     </footer>

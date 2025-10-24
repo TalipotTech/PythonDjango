@@ -170,9 +170,63 @@ class SessionAttendance(models.Model):
 
 
 class Review(models.Model):
+    FEEDBACK_TYPES = [
+        ('quiz', 'Quiz Feedback'),
+        ('review', 'General Review'),
+    ]
+    
     attendee = models.ForeignKey(Attendee, on_delete=models.CASCADE)
     content = models.TextField()
     submitted_at = models.DateTimeField(auto_now_add=True)
+    feedback_type = models.CharField(max_length=10, choices=FEEDBACK_TYPES, default='review')
 
     def __str__(self):
         return f"{self.attendee.name} - {self.submitted_at.strftime('%Y-%m-%d')}"
+
+
+class HitCounter(models.Model):
+    """Track page visits and unique visitors"""
+    ip_address = models.GenericIPAddressField()
+    user_agent = models.TextField(blank=True)
+    path = models.CharField(max_length=500)
+    method = models.CharField(max_length=10, default='GET')
+    timestamp = models.DateTimeField(auto_now_add=True)
+    session_key = models.CharField(max_length=40, blank=True, null=True)
+    user = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-timestamp']
+        verbose_name = 'Hit Counter'
+        verbose_name_plural = 'Hit Counters'
+        indexes = [
+            models.Index(fields=['ip_address', 'timestamp']),
+            models.Index(fields=['path', 'timestamp']),
+        ]
+    
+    def __str__(self):
+        return f"{self.ip_address} - {self.path} - {self.timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
+    
+    @classmethod
+    def get_total_hits(cls):
+        """Get total number of hits"""
+        return cls.objects.count()
+    
+    @classmethod
+    def get_unique_visitors(cls):
+        """Get number of unique IP addresses"""
+        return cls.objects.values('ip_address').distinct().count()
+    
+    @classmethod
+    def get_hits_today(cls):
+        """Get number of hits today"""
+        from django.utils import timezone
+        today = timezone.now().date()
+        return cls.objects.filter(timestamp__date=today).count()
+    
+    @classmethod
+    def get_popular_pages(cls, limit=10):
+        """Get most visited pages"""
+        from django.db.models import Count
+        return cls.objects.values('path').annotate(
+            hit_count=Count('id')
+        ).order_by('-hit_count')[:limit]

@@ -123,6 +123,63 @@
   const timerWarning = document.getElementById('timer-warning');
   const quizForm = document.getElementById('quiz-form');
 
+  // Progress tracking
+  const totalQuestions = {{ progress_stats.total }};
+  const alreadyAnswered = {{ progress_stats.answered }};
+  let currentlyAnswered = 0;
+
+  function updateProgress() {
+    const radioInputs = document.querySelectorAll('input[type="radio"]:checked');
+    const textInputs = document.querySelectorAll('textarea[name^="text_question_"]');
+    
+    let answeredCount = 0;
+    
+    // Count selected radio buttons (multiple choice)
+    answeredCount += radioInputs.length;
+    
+    // Count filled text responses (optional but count if filled)
+    textInputs.forEach(textarea => {
+      if (textarea.value.trim().length > 0) {
+        answeredCount++;
+      }
+    });
+    
+    currentlyAnswered = answeredCount;
+    const totalAnswered = alreadyAnswered + currentlyAnswered;
+    const pending = totalQuestions - totalAnswered;
+    const percentage = totalQuestions > 0 ? Math.round((totalAnswered / totalQuestions) * 100) : 0;
+    
+    // Update progress display
+    const progressText = document.querySelector('.progress-text');
+    const progressBar = document.querySelector('.progress-bar');
+    
+    if (progressText) {
+      progressText.innerHTML = `<strong>Progress:</strong> ${totalAnswered} of ${totalQuestions} questions answered (${pending} pending)`;
+    }
+    
+    if (progressBar) {
+      progressBar.style.width = percentage + '%';
+      progressBar.textContent = percentage + '%';
+    }
+  }
+
+  // Listen for changes on all radio buttons and textareas
+  document.addEventListener('DOMContentLoaded', function() {
+    const radioButtons = document.querySelectorAll('input[type="radio"]');
+    const textAreas = document.querySelectorAll('textarea[name^="text_question_"]');
+    
+    radioButtons.forEach(radio => {
+      radio.addEventListener('change', updateProgress);
+    });
+    
+    textAreas.forEach(textarea => {
+      textarea.addEventListener('input', updateProgress);
+    });
+    
+    // Initial update
+    updateProgress();
+  });
+
   function updateTimer() {
     if (timeRemaining <= 0) {
       // Time's up - auto submit the form

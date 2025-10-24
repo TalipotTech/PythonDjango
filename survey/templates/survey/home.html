@@ -6,23 +6,6 @@
   <div class="header-section">
     <h1 class="page-title">📅 Quiz Events Portal</h1>
     <p class="page-subtitle">Select an event to participate in the quiz</p>
-    
-    <div class="join-code-section">
-      <a href="{% url 'session_code_entry' %}" class="btn-join-code">
-        🔑 Join with Session Code
-      </a>
-    </div>
-    
-    <div class="header-actions">
-      {% if not request.session.attendee_id and not request.session.is_admin %}
-        <a href="{% url 'student_login' %}" class="btn-login">
-          � Student Login
-        </a>
-        <a href="{% url 'admin_login' %}" class="btn-admin">
-          � Admin Login
-        </a>
-      {% endif %}
-    </div>
   </div>
 
   <!-- Current Events Section -->
@@ -214,83 +197,6 @@ document.addEventListener('DOMContentLoaded', function() {
   font-size: 1.2rem;
   color: #4a5568;
   margin-bottom: 1.5rem;
-}
-
-.join-code-section {
-  margin: 2rem 0;
-}
-
-.btn-join-code {
-  display: inline-block;
-  padding: 1rem 2.5rem;
-  background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
-  color: white;
-  border-radius: 15px;
-  font-size: 1.3rem;
-  font-weight: 700;
-  text-decoration: none;
-  box-shadow: 0 4px 20px rgba(246, 173, 85, 0.4);
-  transition: all 0.3s ease;
-  animation: gentle-pulse 3s infinite;
-}
-
-.btn-join-code:hover {
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 6px 25px rgba(246, 173, 85, 0.6);
-}
-
-@keyframes gentle-pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); }
-}
-
-.header-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  margin-top: 1.5rem;
-}
-
-.btn-logout, .btn-login, .btn-admin {
-  padding: 0.75rem 1.5rem;
-  border-radius: 10px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.btn-logout {
-  background: #f56565;
-  color: white;
-}
-
-.btn-logout:hover {
-  background: #e53e3e;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(245, 101, 101, 0.4);
-}
-
-.btn-login {
-  background: #4299e1;
-  color: white;
-}
-
-.btn-login:hover {
-  background: #3182ce;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.4);
-}
-
-.btn-admin {
-  background: #9f7aea;
-  color: white;
-}
-
-.btn-admin:hover {
-  background: #805ad5;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(159, 122, 234, 0.4);
 }
 
 .section-container {

@@ -22,119 +22,142 @@
         <span class="value">{{ attendee.phone }}</span>
       </div>
       <div class="detail-item">
-        <span class="label">🎂 Age:</span>
-        <span class="value">{{ attendee.age|default:"N/A" }}</span>
-      </div>
-      <div class="detail-item">
-        <span class="label">📍 Place:</span>
-        <span class="value">{{ attendee.place|default:"N/A" }}</span>
-      </div>
-      <div class="detail-item">
-        <span class="label">📚 Class Session:</span>
+        <span class="label">📚 Registered Session:</span>
         <span class="value">{{ attendee.class_session.title|default:"Not Assigned" }}</span>
       </div>
       <div class="detail-item">
-        <span class="label">📊 Submission Status:</span>
-        <span class="value">
-          {% if attendee.has_submitted %}
-            <span class="badge badge-success">✓ Submitted</span>
+        <span class="label">📊 Sessions Attended:</span>
+        <span class="value">{{ sessions_data|length }}</span>
+      </div>
+    </div>
+  </div>
+
+  {% if sessions_data %}
+    {% for session_data in sessions_data %}
+    <div class="session-group">
+      <div class="session-header">
+        <h3>📚 {{ session_data.session.title }}</h3>
+        <div class="session-meta">
+          <span class="session-date">{{ session_data.session.start_time|date:"M d, Y H:i" }}</span>
+          {% if session_data.is_completed %}
+            <span class="badge badge-success">✓ Completed</span>
           {% else %}
             <span class="badge badge-pending">⏳ Pending</span>
           {% endif %}
-        </span>
+        </div>
       </div>
-    </div>
-  </div>
 
-  <div class="stats-section">
-    <h3>📈 Quiz Performance</h3>
-    <div class="stats-grid">
-      <div class="stat-box">
-        <div class="stat-value">{{ total_mc_questions }}</div>
-        <div class="stat-label">Multiple Choice Questions</div>
+      <div class="stats-section">
+        <h4>📈 Quiz Performance</h4>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-value">{{ session_data.total_mc_questions }}</div>
+            <div class="stat-label">MC Questions</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value">{{ session_data.total_responses }}</div>
+            <div class="stat-label">Total Answers</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value">{{ session_data.correct_answers }}</div>
+            <div class="stat-label">Correct</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value">{% if session_data.total_mc_questions > 0 %}{{ session_data.score }}%{% else %}N/A{% endif %}</div>
+            <div class="stat-label">Score</div>
+          </div>
+        </div>
       </div>
-      <div class="stat-box">
-        <div class="stat-value">{{ total_responses }}</div>
-        <div class="stat-label">Total Answers</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-value">{{ correct_answers }}</div>
-        <div class="stat-label">Correct (MC)</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-value">{% if total_mc_questions > 0 %}{{ score }}%{% else %}N/A{% endif %}</div>
-        <div class="stat-label">Score</div>
-      </div>
-    </div>
-  </div>
 
-  {% if mc_responses %}
-  <div class="table-section">
-    <h3>📝 Multiple Choice Responses</h3>
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Question</th>
-          <th>Selected Answer</th>
-          <th>Correct Answer</th>
-          <th>Result</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for response in mc_responses %}
-        <tr>
-          <td>{{ forloop.counter }}</td>
-          <td>{{ response.question.text }}</td>
-          <td>
-            {% if response.selected_option == 1 %}{{ response.question.option1 }}
-            {% elif response.selected_option == 2 %}{{ response.question.option2 }}
-            {% elif response.selected_option == 3 %}{{ response.question.option3 }}
-            {% else %}{{ response.question.option4 }}
-            {% endif %}
-          </td>
-          <td>
-            {% if response.question.correct_option == 1 %}{{ response.question.option1 }}
-            {% elif response.question.correct_option == 2 %}{{ response.question.option2 }}
-            {% elif response.question.correct_option == 3 %}{{ response.question.option3 }}
-            {% else %}{{ response.question.option4 }}
-            {% endif %}
-          </td>
-          <td>
-            {% if response.is_correct %}
-              <span class="badge badge-success">✓ Correct</span>
-            {% else %}
-              <span class="badge badge-danger">✗ Wrong</span>
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+      {% if session_data.mc_responses %}
+      <div class="table-section">
+        <h4>📝 Multiple Choice Responses</h4>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Question</th>
+              <th>Selected Answer</th>
+              <th>Correct Answer</th>
+              <th>Result</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for response in session_data.mc_responses %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ response.question.text }}</td>
+              <td>
+                {% if response.selected_option == 1 %}{{ response.question.option1 }}
+                {% elif response.selected_option == 2 %}{{ response.question.option2 }}
+                {% elif response.selected_option == 3 %}{{ response.question.option3 }}
+                {% else %}{{ response.question.option4 }}
+                {% endif %}
+              </td>
+              <td>
+                {% if response.question.correct_option == 1 %}{{ response.question.option1 }}
+                {% elif response.question.correct_option == 2 %}{{ response.question.option2 }}
+                {% elif response.question.correct_option == 3 %}{{ response.question.option3 }}
+                {% else %}{{ response.question.option4 }}
+                {% endif %}
+              </td>
+              <td>
+                {% if response.is_correct %}
+                  <span class="badge badge-success">✓ Correct</span>
+                {% else %}
+                  <span class="badge badge-danger">✗ Wrong</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+
+      {% if session_data.text_responses %}
+      <div class="table-section">
+        <h4>💭 Text Responses</h4>
+        <div class="text-responses-container">
+          {% for response in session_data.text_responses %}
+          <div class="text-response-card">
+            <div class="response-question">
+              <strong>Q{{ forloop.counter }}:</strong> {{ response.question.text }}
+            </div>
+            <div class="response-text">
+              {{ response.text_response }}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  {% else %}
+  <div class="no-data-card">
+    <p>No quiz sessions attended yet</p>
   </div>
   {% endif %}
 
-  {% if text_responses %}
-  <div class="table-section">
-    <h3>💭 Text Responses</h3>
-    <div class="text-responses-container">
-      {% for response in text_responses %}
-      <div class="text-response-card">
-        <div class="response-question">
-          <strong>Q{{ forloop.counter }}:</strong> {{ response.question.text }}
+  <!-- Feedback / Questions Section -->
+  {% if attendee_feedback %}
+  <div class="session-group">
+    <div class="session-header">
+      <h3>💬 Feedback / Questions</h3>
+    </div>
+    <div class="feedback-list">
+      {% for feedback in attendee_feedback %}
+      <div class="feedback-item">
+        <div class="feedback-meta">
+          <span class="feedback-date">📅 {{ feedback.submitted_at|date:"M d, Y H:i" }}</span>
         </div>
-        <div class="response-text">
-          {{ response.text_response }}
+        <div class="feedback-content">
+          {{ feedback.content }}
         </div>
       </div>
       {% endfor %}
     </div>
-  </div>
-  {% endif %}
-
-  {% if not mc_responses and not text_responses %}
-  <div class="no-data-card">
-    <p>No quiz responses yet</p>
   </div>
   {% endif %}
 
@@ -203,26 +226,54 @@
   color: #1f2937;
 }
 
-.stats-section {
+.session-group {
   background: white;
   padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
+  border-left: 5px solid #667eea;
 }
 
-.stats-section h3 {
-  margin-top: 0;
-  color: #1f2937;
-  border-bottom: 2px solid #e5e7eb;
+.session-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
   padding-bottom: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.session-header h3 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 1.5rem;
+}
+
+.session-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.session-date {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.stats-section {
+  margin-bottom: 1.5rem;
+}
+
+.stats-section h4 {
+  color: #1f2937;
+  margin-bottom: 1rem;
 }
 
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 1.5rem;
-  margin-top: 1.5rem;
 }
 
 .stat-box {
@@ -245,18 +296,12 @@
 }
 
 .table-section {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
-.table-section h3 {
-  margin-top: 0;
+.table-section h4 {
   color: #1f2937;
-  border-bottom: 2px solid #e5e7eb;
-  padding-bottom: 1rem;
+  margin-bottom: 1rem;
 }
 
 .data-table {
@@ -354,12 +399,52 @@
   margin-top: 2rem;
 }
 
+.feedback-list {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.feedback-item {
+  background: #f0f9ff;
+  border-left: 4px solid #3b82f6;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.feedback-meta {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+}
+
+.feedback-date {
+  font-weight: 500;
+}
+
+.feedback-content {
+  color: #1f2937;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  background: white;
+  padding: 1rem;
+  border-radius: 6px;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+}
+
 @media (max-width: 768px) {
   .view-container {
     padding: 1rem;
   }
 
   .view-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .session-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
