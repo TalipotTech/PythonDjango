@@ -15,12 +15,35 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.views.generic import RedirectView
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+
+# Swagger/OpenAPI Schema Configuration
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Quiz Portal API",
+        default_version='v1',
+        description="Complete REST API documentation for the Quiz Portal application",
+        terms_of_service="https://www.yourapp.com/terms/",
+        contact=openapi.Contact(email="contact@quizportal.com"),
+        license=openapi.License(name="MIT License"),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
 
 urlpatterns = [
     path('admin/', RedirectView.as_view(pattern_name='admin_login', permanent=False)),
     path('django-admin/', admin.site.urls),  # Move Django admin to /django-admin/
+    
+    # Swagger UI and API Documentation
+    re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    
     path('api/', include('survey.api_urls', namespace='api')),  # REST API endpoints
     path('', include('survey.urls')),  # ✅ Includes homepage and all survey views
 ]

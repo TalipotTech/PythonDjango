@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'django_filters',
+    # Swagger/OpenAPI Documentation
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -211,11 +213,18 @@ SIMPLE_JWT = {
 
 # ===== CORS Configuration =====
 CORS_ALLOWED_ORIGINS = [
+    "http://localhost:4200",  # Angular frontend
+    "http://127.0.0.1:4200",  # Angular frontend (alternative)
     "http://localhost:3000",  # React/Vue frontend
     "http://localhost:8080",  # Alternative frontend
     "http://127.0.0.1:3000",
     "http://127.0.0.1:8080",
+    "http://localhost:8000",  # For Swagger UI
+    "http://127.0.0.1:8000",  # For Swagger UI (alternative)
 ]
+
+# For development - allow all origins (comment out in production)
+CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -239,3 +248,4 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
+

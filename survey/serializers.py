@@ -68,7 +68,10 @@ class AttendeeRegistrationSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Attendee
-        fields = ['name', 'phone', 'email', 'age', 'place', 'session_code']
+        fields = ['name', 'phone', 'email', 'session_code']
+        extra_kwargs = {
+            'phone': {'required': False},  # Make phone optional
+        }
     
     def validate_session_code(self, value):
         """Validate that session code exists and is active"""
@@ -265,6 +268,7 @@ class SessionAttendanceSerializer(serializers.ModelSerializer):
 
 class HitCounterSerializer(serializers.ModelSerializer):
     """Serializer for HitCounter model"""
+    ip_address = serializers.CharField(max_length=45)  # Override to avoid DRF compatibility issue
     
     class Meta:
         model = HitCounter

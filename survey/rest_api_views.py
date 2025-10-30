@@ -219,11 +219,11 @@ class QuestionViewSet(viewsets.ModelViewSet):
     """
     API endpoint for Questions
     """
-    queryset = Question.objects.all().select_related('session')
+    queryset = Question.objects.all().select_related('class_session')
     serializer_class = QuestionSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ['session', 'question_type']
-    search_fields = ['question_text']
+    filterset_fields = ['class_session', 'question_type']
+    search_fields = ['text']
     
     def get_permissions(self):
         """
@@ -252,10 +252,14 @@ class ResponseViewSet(viewsets.ModelViewSet):
         Non-staff users can only see their own responses
         """
         queryset = super().get_queryset()
+        # Skip filtering during Swagger schema generation
+        if getattr(self, 'swagger_fake_view', False):
+            return queryset
         if not self.request.user.is_staff:
             # Filter by email if attendee
-            email = self.request.query_params.get('email', self.request.user.email)
-            queryset = queryset.filter(attendee__email=email)
+            email = self.request.query_params.get('email', self.request.user.email if self.request.user.is_authenticated else None)
+            if email:
+                queryset = queryset.filter(attendee__email=email)
         return queryset
     
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
@@ -269,7 +273,7 @@ class ResponseViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """
-    API endpoint for Reviews/Feedback
+    API endpoint for Reviews/Feedback - No authentication required for creating feedback
     """
     queryset = Review.objects.all().select_related('attendee')
     serializer_class = ReviewSerializer
@@ -278,26 +282,31 @@ class ReviewViewSet(viewsets.ModelViewSet):
     search_fields = ['content']
     ordering_fields = ['submitted_at']
     ordering = ['-submitted_at']
+    authentication_classes = []  # No authentication required
     
     def get_permissions(self):
         """
-        Allow authenticated users to create reviews
+        Allow anyone to create feedback/reviews
         Admin can see all reviews
         """
         if self.action == 'create':
-            return [IsAuthenticated()]
+            return [AllowAny()]  # Anyone can submit feedback
         elif self.action in ['list', 'retrieve']:
-            return [IsAdminUser()]
-        return [IsAuthenticated()]
+            return [IsAdminUser()]  # Only admin can view feedback
+        return [IsAdminUser()]
     
     def get_queryset(self):
         """
         Non-staff users can only see their own reviews
         """
         queryset = super().get_queryset()
+        # Skip filtering during Swagger schema generation
+        if getattr(self, 'swagger_fake_view', False):
+            return queryset
         if not self.request.user.is_staff:
-            email = self.request.query_params.get('email', self.request.user.email)
-            queryset = queryset.filter(attendee__email=email)
+            email = self.request.query_params.get('email', self.request.user.email if self.request.user.is_authenticated else None)
+            if email:
+                queryset = queryset.filter(attendee__email=email)
         return queryset
 
 
@@ -318,9 +327,13 @@ class QuizProgressViewSet(viewsets.ModelViewSet):
         Non-staff users can only see their own progress
         """
         queryset = super().get_queryset()
+        # Skip filtering during Swagger schema generation
+        if getattr(self, 'swagger_fake_view', False):
+            return queryset
         if not self.request.user.is_staff:
-            email = self.request.query_params.get('email', self.request.user.email)
-            queryset = queryset.filter(attendee__email=email)
+            email = self.request.query_params.get('email', self.request.user.email if self.request.user.is_authenticated else None)
+            if email:
+                queryset = queryset.filter(attendee__email=email)
         return queryset
     
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
@@ -359,9 +372,13 @@ class SessionAttendanceViewSet(viewsets.ModelViewSet):
         Non-staff users can only see their own attendance
         """
         queryset = super().get_queryset()
+        # Skip filtering during Swagger schema generation
+        if getattr(self, 'swagger_fake_view', False):
+            return queryset
         if not self.request.user.is_staff:
-            email = self.request.query_params.get('email', self.request.user.email)
-            queryset = queryset.filter(attendee__email=email)
+            email = self.request.query_params.get('email', self.request.user.email if self.request.user.is_authenticated else None)
+            if email:
+                queryset = queryset.filter(attendee__email=email)
         return queryset
     
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
