@@ -15,21 +15,19 @@ from .rest_api_views import (
 )
 
 # Import from api_views
-from .api_views import check_participant_exists, send_session_code_email, verify_session_code_with_email
+from .api_views import check_participant_exists, send_session_code_email, verify_session_code_with_email, student_login_api, get_attendee_completed_sessions
 
-# Create router for ViewSets - Only 3 endpoints for now
+# Create router for ViewSets - Student + Admin endpoints
 router = DefaultRouter()
+# Student endpoints
 router.register(r'students', AttendeeViewSet, basename='api-student')  # Student Registration
 router.register(r'sessions', QuizSessionViewSet, basename='api-session')  # Session Information
 router.register(r'feedback', ReviewViewSet, basename='api-feedback')  # Feedback
+router.register(r'questions', QuestionViewSet, basename='api-question')  # Questions for quiz
+router.register(r'responses', ResponseViewSet, basename='api-response')  # Submit responses
 
-# Commented out - Not needed for now
-# router.register(r'questions', QuestionViewSet, basename='api-question')
-# router.register(r'responses', ResponseViewSet, basename='api-response')
-# router.register(r'progress', QuizProgressViewSet, basename='api-progress')
-# router.register(r'attendance', SessionAttendanceViewSet, basename='api-attendance')
-# router.register(r'hits', HitCounterViewSet, basename='api-hits')
-# router.register(r'admins', AdminViewSet, basename='api-admin')
+# Admin endpoints
+router.register(r'admins', AdminViewSet, basename='api-admin')  # Admin management
 
 app_name = 'api'
 
@@ -43,15 +41,17 @@ urlpatterns = [
     # AJAX endpoints for session access
     path('sessions/send_code/', send_session_code_email, name='send_session_code'),
     path('sessions/verify_code/', verify_session_code_with_email, name='verify_session_code'),
+    path('student/login/', student_login_api, name='student_login_api'),
+    path('student/<int:attendee_id>/completed-sessions/', get_attendee_completed_sessions, name='attendee_completed_sessions'),
 
-    # Router URLs (ViewSets) - Only 3 main endpoints
+    # Router URLs (ViewSets) - Student + Admin endpoints
     path('', include(router.urls)),
     
-    # Commented out - Authentication endpoints (not needed for now)
-    # path('auth/register/', UserRegistrationView.as_view(), name='register'),
-    # path('auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    # path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    # path('auth/profile/', UserProfileView.as_view(), name='profile'),
-    # path('stats/dashboard/', dashboard_statistics, name='dashboard_stats'),
-    # path('check-participant/', check_participant_exists, name='check_participant'),
+    # Admin authentication endpoints
+    path('auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('auth/profile/', UserProfileView.as_view(), name='profile'),
+    
+    # Admin statistics dashboard
+    path('stats/dashboard/', dashboard_statistics, name='dashboard_stats'),
 ]

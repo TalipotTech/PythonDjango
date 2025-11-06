@@ -127,12 +127,17 @@ Workshop Team
 def verify_session_code_with_email(request):
     """
     Verify session code and check if user is new or existing
-    Request body: { "email": "user@example.com", "session_code": "ABC12345" }
+    Request body: { 
+        "email": "user@example.com", 
+        "session_code": "ABC12345",
+        "expected_session_id": 1  (optional - to validate against specific session)
+    }
     """
     try:
         data = json.loads(request.body)
         email = data.get('email', '').strip()
         session_code = data.get('session_code', '').strip()
+        expected_session_id = data.get('expected_session_id')  # Optional
 
         if not email or not session_code:
             return JsonResponse({
@@ -146,8 +151,15 @@ def verify_session_code_with_email(request):
         except ClassSession.DoesNotExist:
             return JsonResponse({
                 'valid': False,
-                'message': 'Invalid session code.'
+                'message': 'Invalid session code. Please check and try again.'
             }, status=404)
+
+        # If expected_session_id is provided, validate it matches
+        if expected_session_id and session.id != expected_session_id:
+            return JsonResponse({
+                'valid': False,
+                'message': f'This code is for a different session. Please use the code for the session you selected.'
+            }, status=400)
 
         # Check if user already exists
         user_exists = Attendee.objects.filter(email__iexact=email).exists()
@@ -170,4 +182,117 @@ def verify_session_code_with_email(request):
         return JsonResponse({
             'valid': False,
             'message': f'Error verifying code: {str(e)}'
+        }, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def student_login_api(request):
+    """
+    Student login with email and optional password
+    Request body: { "email": "user@example.com", "password": "password123" }
+    Password is optional - if attendee has no password set, login with email only
+    """
+    try:
+        from django.contrib.auth.hashers import check_password
+        
+        data = json.loads(request.body)
+        email = data.get('email', '').strip()
+        password = data.get('password', '').strip()
+
+        if not email:
+            return JsonResponse({
+                'success': False,
+                'message': 'Email is required.'
+            }, status=400)
+
+        # Find attendee by email
+        try:
+            attendee = Attendee.objects.get(email__iexact=email)
+        except Attendee.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'No account found with this email address.'
+            }, status=401)
+
+        # Check password if attendee has one set
+        if attendee.password:
+            if not password:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Password is required for this account.'
+                }, status=401)
+            
+            pwd = attendee.password
+            # Check if password is hashed
+            if pwd.startswith('pbkdf2_') or pwd.startswith('argon2$') or pwd.startswith('bcrypt') or pwd.startswith('sha1$'):
+                if not check_password(password, pwd):
+                    return JsonResponse({
+                        'success': False,
+                        'message': 'Invalid password.'
+                    }, status=401)
+            else:
+                # Legacy plaintext password
+                if pwd != password:
+                    return JsonResponse({
+                        'success': False,
+                        'message': 'Invalid password.'
+                    }, status=401)
+        # If no password set, allow login with email only
+
+        # Login successful - return attendee data
+        return JsonResponse({
+            'success': True,
+            'message': 'Login successful',
+            'attendee': {
+                'id': attendee.id,
+                'name': attendee.name,
+                'email': attendee.email,
+                'phone': attendee.phone,
+                'session_id': attendee.class_session.id if attendee.class_session else None,
+                'session_title': attendee.class_session.title if attendee.class_session else None,
+            }
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error during login: {str(e)}'
+        }, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_attendee_completed_sessions(request, attendee_id):
+    """
+    Get all sessions that the attendee has responded to
+    Returns session IDs that should be hidden from "Available Sessions"
+    """
+    try:
+        from .models import Response
+        
+        attendee = Attendee.objects.get(id=attendee_id)
+        
+        # Get all unique session IDs where the student has submitted responses
+        completed_session_ids = Response.objects.filter(
+            attendee=attendee
+        ).values_list(
+            'question__class_session_id', flat=True
+        ).distinct()
+        
+        return JsonResponse({
+            'success': True,
+            'completed_session_ids': list(completed_session_ids),
+            'count': len(completed_session_ids)
+        })
+        
+    except Attendee.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': 'Attendee not found'
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error: {str(e)}'
         }, status=500)

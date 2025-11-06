@@ -46,6 +46,7 @@ class AttendeeSerializer(serializers.ModelSerializer):
     """Serializer for Attendee model"""
     session_title = serializers.CharField(source='class_session.title', read_only=True, allow_null=True)
     session_code = serializers.CharField(source='class_session.session_code', read_only=True, allow_null=True)
+    attended_sessions = serializers.SerializerMethodField()
     
     class Meta:
         model = Attendee
@@ -53,22 +54,40 @@ class AttendeeSerializer(serializers.ModelSerializer):
             'id', 'name', 'phone', 'email', 'age', 'place',
             'class_session', 'session_title', 'session_code',
             'has_submitted', 'quiz_started_at', 'plain_password',
+            'attended_sessions',
             'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at', 'quiz_started_at']
+        read_only_fields = ['id', 'created_at', 'updated_at', 'quiz_started_at', 'attended_sessions']
         extra_kwargs = {
             'plain_password': {'write_only': True},
             'password': {'write_only': True}
         }
+    
+    def get_attended_sessions(self, obj):
+        """Get all sessions the student has attended (has responses for)"""
+        from .models import Response as QuizResponse
+        
+        # Get unique session IDs from responses
+        session_ids = QuizResponse.objects.filter(
+            attendee=obj
+        ).values_list(
+            'question__class_session_id', flat=True
+        ).distinct()
+        
+        # Get session details
+        sessions = ClassSession.objects.filter(id__in=session_ids).values('id', 'title', 'session_code')
+        return list(sessions)
 
 
 class AttendeeRegistrationSerializer(serializers.ModelSerializer):
     """Serializer for attendee registration via API"""
     session_code = serializers.CharField(write_only=True, max_length=20)
+    password = serializers.CharField(write_only=True, min_length=6, required=False)
     
     class Meta:
         model = Attendee
-        fields = ['name', 'phone', 'email', 'session_code']
+        fields = ['id', 'name', 'phone', 'email', 'session_code', 'password']
+        read_only_fields = ['id']
         extra_kwargs = {
             'phone': {'required': False},  # Make phone optional
         }
@@ -100,12 +119,25 @@ class AttendeeRegistrationSerializer(serializers.ModelSerializer):
         return value
     
     def create(self, validated_data):
+        from django.contrib.auth.hashers import make_password
+        
         session_code = validated_data.pop('session_code')
+        password = validated_data.pop('password', None)
+        
         session = ClassSession.objects.get(session_code=session_code)
+        
+        # Create attendee
         attendee = Attendee.objects.create(
             class_session=session,
             **validated_data
         )
+        
+        # Set password if provided
+        if password:
+            attendee.password = make_password(password)
+            attendee.plain_password = password  # Store plain password for admin viewing
+            attendee.save()
+        
         return attendee
 
 
@@ -191,14 +223,18 @@ class ReviewSerializer(serializers.ModelSerializer):
     """Serializer for Review/Feedback model"""
     attendee_name = serializers.CharField(source='attendee.name', read_only=True)
     attendee_email = serializers.CharField(source='attendee.email', read_only=True)
+    attendee_phone = serializers.CharField(source='attendee.phone', read_only=True)
+    attendee_session = serializers.IntegerField(source='attendee.class_session.id', read_only=True, allow_null=True)
+    session_title = serializers.CharField(source='attendee.class_session.title', read_only=True, allow_null=True)
     
     class Meta:
         model = Review
         fields = [
-            'id', 'attendee', 'attendee_name', 'attendee_email',
-            'content', 'submitted_at'
+            'id', 'attendee', 'attendee_name', 'attendee_email', 
+            'attendee_phone', 'attendee_session', 'session_title',
+            'content', 'feedback_type', 'submitted_at'
         ]
-        read_only_fields = ['id', 'submitted_at']
+        read_only_fields = ['id', 'submitted_at', 'attendee_name', 'attendee_email', 'attendee_phone', 'attendee_session', 'session_title']
 
 
 class QuizSessionDetailSerializer(serializers.ModelSerializer):

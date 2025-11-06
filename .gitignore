@@ -63,12 +63,24 @@ db.sqlite3-journal
 # Environments
 .env
 .env.*
+!.env.example
+!.env.production
+!.env.azure
 .venv
 venv/
 ENV/
 env/
 env.bak/
 venv.bak/
+
+# Azure
+.azure/
+azure-credentials.json
+local.settings.json
+
+# React build
+react-frontend/build/
+react-frontend/node_modules/
 
 # IDEs and editors
 .vscode/

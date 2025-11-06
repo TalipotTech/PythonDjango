@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Database Status Test</title>
+    <style>
+        .banner {
+            padding: 20px;
+            background-color: #d4edda;
+            color: #155724;
+            border: 3px solid #28a745;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Database Connection Test</h1>
+    
+    {% if database_info %}
+    <div class="banner">
+        {{ database_info.icon }} {{ database_info.environment }} DATABASE | 
+        {{ database_info.type }} | 
+        {{ database_info.location }}
+        <br>
+        <small>Host: {{ database_info.host }} | Database: {{ database_info.name }}</small>
+    </div>
+    {% else %}
+    <p style="color: red;">ERROR: database_info not available!</p>
+    {% endif %}
+    
+    <h2>Database Details:</h2>
+    <pre>{{ database_info }}</pre>
+    
+    <p><a href="/admin/">Go to Django Admin</a></p>
+</body>
+</html>

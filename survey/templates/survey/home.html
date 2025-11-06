@@ -16,8 +16,6 @@
       {% for session in current_sessions %}
       <div class="event-card current-event" data-countdown="{{ session.countdown_total_seconds }}" data-session-id="{{ session.id }}">
         <div class="event-badge current">LIVE NOW</div>
-        <!-- Attendee count badge -->
-        <div class="attendee-count-badge">👥 {{ session.attendee_count }}</div>
         <h3 class="event-title">{{ session.title }}</h3>
         <p class="event-teacher">👨‍🏫 {{ session.teacher }}</p>
         
@@ -68,8 +66,6 @@
       {% for session in future_sessions %}
       <div class="event-card future-event" data-countdown="{{ session.countdown_total_seconds }}" data-session-id="{{ session.id }}">
         <div class="event-badge future">UPCOMING</div>
-        <!-- Attendee count badge -->
-        <div class="attendee-count-badge">👥 {{ session.attendee_count }}</div>
         <h3 class="event-title">{{ session.title }}</h3>
         <p class="event-teacher">👨‍🏫 {{ session.teacher }}</p>
         
@@ -263,20 +259,6 @@ document.addEventListener('DOMContentLoaded', function() {
   color: white;
 }
 
-.session-code-badge {
-  position: absolute;
-  top: 3.5rem;
-  right: 1rem;
-  background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 0.9rem;
-  letter-spacing: 1px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
 @keyframes pulse {
   0%, 100% { transform: scale(1); opacity: 1; }
   50% { transform: scale(1.05); opacity: 0.9; }
@@ -287,7 +269,7 @@ document.addEventListener('DOMContentLoaded', function() {
   font-weight: 700;
   color: #1a202c;
   margin-bottom: 0.5rem;
-  padding-right: 6rem;
+  padding-right: 5rem;
 }
 
 .event-teacher {
@@ -454,21 +436,6 @@ document.addEventListener('DOMContentLoaded', function() {
     font-size: 1rem;
   }
 }
-
-/* Attendee count badge on event cards */
-.attendee-count-badge {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
-  color: white;
-  padding: 0.4rem 0.8rem;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 0.9rem;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.12);
-}
-
 </style>
 
 {% endblock %}

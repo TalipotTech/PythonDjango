@@ -1,0 +1,635 @@
+{
+  "users": [
+    {
+      "username": "admin",
+      "email": "admin@gmail.com",
+      "is_staff": true,
+      "is_superuser": true,
+      "first_name": "",
+      "last_name": ""
+    },
+    {
+      "username": "admin1",
+      "email": "admin1@gmail.com",
+      "is_staff": true,
+      "is_superuser": true,
+      "first_name": "",
+      "last_name": ""
+    },
+    {
+      "username": "sandra",
+      "email": "sandrasanthosh1426@gmail.com",
+      "is_staff": false,
+      "is_superuser": false,
+      "first_name": "sandra",
+      "last_name": "santhosh"
+    },
+    {
+      "username": "Admin",
+      "email": "admin123@gmail.com",
+      "is_staff": true,
+      "is_superuser": true,
+      "first_name": "",
+      "last_name": ""
+    },
+    {
+      "username": "testadmin",
+      "email": "admin@test.com",
+      "is_staff": true,
+      "is_superuser": true,
+      "first_name": "",
+      "last_name": ""
+    }
+  ],
+  "attendees": [
+    {
+      "name": "sandra santhosh",
+      "email": "sandrasanthosh1426@gmail.com",
+      "age": null,
+      "place": "",
+      "class_session_id": 4,
+      "password": "",
+      "plain_password": ""
+    },
+    {
+      "name": "sherin",
+      "email": "sherinsaju08@gmail.com",
+      "age": null,
+      "place": "",
+      "class_session_id": 2,
+      "password": "",
+      "plain_password": ""
+    }
+  ],
+  "sessions": [
+    {
+      "id": 1,
+      "title": "python Basic",
+      "teacher": "sreeja",
+      "start_time": "2025-11-04 05:44:57.133270+00:00",
+      "end_time": "2025-11-07 06:44:57.133270+00:00",
+      "session_code": "R7WRLVM9"
+    },
+    {
+      "id": 2,
+      "title": "Django Intro",
+      "teacher": "Arun",
+      "start_time": "2025-11-03 05:03:00+00:00",
+      "end_time": "2025-11-05 04:48:00+00:00",
+      "session_code": "87ZB87T5"
+    },
+    {
+      "id": 3,
+      "title": "A i",
+      "teacher": "anjana",
+      "start_time": "2025-11-03 00:31:00+00:00",
+      "end_time": "2025-11-05 08:30:00+00:00",
+      "session_code": "18AUINDB"
+    },
+    {
+      "id": 4,
+      "title": "Angular",
+      "teacher": "roopa",
+      "start_time": "2025-11-01 04:30:00+00:00",
+      "end_time": "2025-11-04 12:30:00+00:00",
+      "session_code": "YZZER4P3"
+    },
+    {
+      "id": 5,
+      "title": "html",
+      "teacher": "arya",
+      "start_time": "2025-11-04 05:44:57.133270+00:00",
+      "end_time": "2025-11-07 06:44:57.133270+00:00",
+      "session_code": "RUATP70L"
+    },
+    {
+      "id": 6,
+      "title": "c#",
+      "teacher": "jeevan",
+      "start_time": "2025-11-04 05:44:57.133270+00:00",
+      "end_time": "2025-11-07 06:44:57.133270+00:00",
+      "session_code": "UOP7DMDW"
+    }
+  ],
+  "questions": [
+    {
+      "text": "What is the correct file extension for Python files",
+      "question_type": "multiple_choice",
+      "option1": "- .pt",
+      "option2": "- .py -",
+      "option3": "- .py -",
+      "option4": "- .python",
+      "correct_option": 4,
+      "class_session_id": 1
+    },
+    {
+      "text": "Which one is a Python data type?",
+      "question_type": "multiple_choice",
+      "option1": "- Circle",
+      "option2": "Integer",
+      "option3": "- Paragraph",
+      "option4": "Slide",
+      "correct_option": 2,
+      "class_session_id": 1
+    },
+    {
+      "text": "What is Django primarily used for?",
+      "question_type": "multiple_choice",
+      "option1": "Mobile app development",
+      "option2": "Game development",
+      "option3": "- Web development",
+      "option4": "- Data analysis",
+      "correct_option": 3,
+      "class_session_id": 2
+    },
+    {
+      "text": "What does the runserver command do?",
+      "question_type": "multiple_choice",
+      "option1": "Creates a new app",
+      "option2": "- Starts the development web server",
+      "option3": "Installs Django",
+      "option4": "- Runs database migrations",
+      "correct_option": 2,
+      "class_session_id": 2
+    },
+    {
+      "text": "- What is the primary goal of Artificial Intelligence?",
+      "question_type": "multiple_choice",
+      "option1": "- To replace all human jobs",
+      "option2": "- To create machines that can think and act like humans",
+      "option3": "- To build faster computers",
+      "option4": "- To eliminate the need for software",
+      "correct_option": 2,
+      "class_session_id": 3
+    },
+    {
+      "text": "- Which of these is a common application of AI in daily life?",
+      "question_type": "multiple_choice",
+      "option1": "Weather forecasting",
+      "option2": "Voice assistants like Siri or Alexa",
+      "option3": "- Building bridges",
+      "option4": "- Growing crops",
+      "correct_option": 2,
+      "class_session_id": 3
+    },
+    {
+      "text": "- What is the Turing Test used for?",
+      "question_type": "multiple_choice",
+      "option1": "- To measure computer speed",
+      "option2": "- To test a robot’s strength",
+      "option3": "To evaluate a machine’s ability to exhibit intelligent behavior",
+      "option4": "- To check software bugs",
+      "correct_option": 3,
+      "class_session_id": 3
+    },
+    {
+      "text": "Which of the following is an example of Narrow AI?",
+      "question_type": "multiple_choice",
+      "option1": "- A robot that can feel emotions",
+      "option2": "A general-purpose AI assistant",
+      "option3": "A chess-playing program",
+      "option4": "- A machine that writes novels from scratch",
+      "correct_option": 3,
+      "class_session_id": 3
+    },
+    {
+      "text": "- What does the input() function do?",
+      "question_type": "multiple_choice",
+      "option1": "- Displays output",
+      "option2": "- Reads a file",
+      "option3": "Takes user input",
+      "option4": "- Defines a function",
+      "correct_option": 3,
+      "class_session_id": 1
+    },
+    {
+      "text": "- Which operator is used for division in Python?",
+      "question_type": "multiple_choice",
+      "option1": "- // -",
+      "option2": "- % -",
+      "option3": "- / -",
+      "option4": "- **",
+      "correct_option": 3,
+      "class_session_id": 1
+    },
+    {
+      "text": "- Which directive is used to loop through items in Angular templates?",
+      "question_type": "multiple_choice",
+      "option1": "- *ngIf -",
+      "option2": "- *ngFor -",
+      "option3": "- *ngLoop -",
+      "option4": "- *ngRepeat",
+      "correct_option": 2,
+      "class_session_id": 4
+    },
+    {
+      "text": "- What is the role of @NgModule in Angular?",
+      "question_type": "multiple_choice",
+      "option1": "- To define a service",
+      "option2": "- To create a route",
+      "option3": "- To configure an Angular module",
+      "option4": "- To declare a component",
+      "correct_option": 3,
+      "class_session_id": 4
+    },
+    {
+      "text": "- What is the purpose of Angular components?",
+      "question_type": "multiple_choice",
+      "option1": "- To handle database queries",
+      "option2": "To define reusable UI blocks",
+      "option3": "- To style the application",
+      "option4": "- To manage server-side logic",
+      "correct_option": 2,
+      "class_session_id": 4
+    },
+    {
+      "text": "Which language is Angular written in?",
+      "question_type": "multiple_choice",
+      "option1": "- JavaScript",
+      "option2": "- TypeScript",
+      "option3": "Python",
+      "option4": "- PHP",
+      "correct_option": 2,
+      "class_session_id": 4
+    },
+    {
+      "text": "why choose this course?",
+      "question_type": "text_response",
+      "option1": null,
+      "option2": null,
+      "option3": null,
+      "option4": null,
+      "correct_option": null,
+      "class_session_id": 3
+    },
+    {
+      "text": "why thuis?",
+      "question_type": "text_response",
+      "option1": null,
+      "option2": null,
+      "option3": null,
+      "option4": null,
+      "correct_option": null,
+      "class_session_id": 5
+    },
+    {
+      "text": "what dhuidsyuhsfjhsd?",
+      "question_type": "text_response",
+      "option1": null,
+      "option2": null,
+      "option3": null,
+      "option4": null,
+      "correct_option": null,
+      "class_session_id": 5
+    },
+    {
+      "text": "jfhndjjkkdjdnnjdj",
+      "question_type": "text_response",
+      "option1": null,
+      "option2": null,
+      "option3": null,
+      "option4": null,
+      "correct_option": null,
+      "class_session_id": 6
+    }
+  ],
+  "responses": [
+    {
+      "question_id": 11,
+      "attendee_id": 84,
+      "selected_option": 2,
+      "text_response": null
+    },
+    {
+      "question_id": 12,
+      "attendee_id": 84,
+      "selected_option": 3,
+      "text_response": null
+    },
+    {
+      "question_id": 13,
+      "attendee_id": 84,
+      "selected_option": 1,
+      "text_response": null
+    },
+    {
+      "question_id": 11,
+      "attendee_id": 84,
+      "selected_option": 3,
+      "text_response": null
+    },
+    {
+      "question_id": 12,
+      "attendee_id": 84,
+      "selected_option": 3,
+      "text_response": null
+    },
+    {
+      "question_id": 13,
+      "attendee_id": 84,
+      "selected_option": 3,
+      "text_response": null
+    },
+    {
+      "question_id": 14,
+      "attendee_id": 84,
+      "selected_option": 2,
+      "text_response": null
+    },
+    {
+      "question_id": 3,
+      "attendee_id": 85,
+      "selected_option": 2,
+      "text_response": null
+    },
+    {
+      "question_id": 3,
+      "attendee_id": 85,
+      "selected_option": 3,
+      "text_response": null
+    },
+    {
+      "question_id": 4,
+      "attendee_id": 85,
+      "selected_option": 1,
+      "text_response": null
+    },
+    {
+      "question_id": 5,
+      "attendee_id": 85,
+      "selected_option": 2,
+      "text_response": null
+    },
+    {
+      "question_id": 6,
+      "attendee_id": 85,
+      "selected_option": 3,
+      "text_response": null
+    },
+    {
+      "question_id": 7,
+      "attendee_id": 85,
+      "selected_option": 3,
+      "text_response": null
+    },
+    {
+      "question_id": 8,
+      "attendee_id": 85,
+      "selected_option": 3,
+      "text_response": null
+    },
+    {
+      "question_id": 15,
+      "attendee_id": 85,
+      "selected_option": null,
+      "text_response": "ai session type session"
+    },
+    {
+      "question_id": 3,
+      "attendee_id": 84,
+      "selected_option": 3,
+      "text_response": null
+    },
+    {
+      "question_id": 4,
+      "attendee_id": 84,
+      "selected_option": 2,
+      "text_response": null
+    },
+    {
+      "question_id": 11,
+      "attendee_id": 84,
+      "selected_option": 2,
+      "text_response": null
+    },
+    {
+      "question_id": 12,
+      "attendee_id": 84,
+      "selected_option": 2,
+      "text_response": null
+    },
+    {
+      "question_id": 13,
+      "attendee_id": 84,
+      "selected_option": 3,
+      "text_response": null
+    },
+    {
+      "question_id": 14,
+      "attendee_id": 84,
+      "selected_option": 2,
+      "text_response": null
+    },
+    {
+      "question_id": 3,
+      "attendee_id": 84,
+      "selected_option": 1,
+      "text_response": null
+    },
+    {
+      "question_id": 4,
+      "attendee_id": 84,
+      "selected_option": 2,
+      "text_response": null
+    },
+    {
+      "question_id": 5,
+      "attendee_id": 84,
+      "selected_option": 1,
+      "text_response": null
+    },
+    {
+      "question_id": 6,
+      "attendee_id": 84,
+      "selected_option": 1,
+      "text_response": null
+    },
+    {
+      "question_id": 7,
+      "attendee_id": 84,
+      "selected_option": 3,
+      "text_response": null
+    },
+    {
+      "question_id": 15,
+      "attendee_id": 84,
+      "selected_option": null,
+      "text_response": "beuayse i loe rthis sub"
+    },
+    {
+      "question_id": 3,
+      "attendee_id": 84,
+      "selected_option": 1,
+      "text_response": null
+    },
+    {
+      "question_id": 4,
+      "attendee_id": 84,
+      "selected_option": 1,
+      "text_response": null
+    },
+    {
+      "question_id": 3,
+      "attendee_id": 84,
+      "selected_option": 1,
+      "text_response": null
+    },
+    {
+      "question_id": 4,
+      "attendee_id": 84,
+      "selected_option": 1,
+      "text_response": null
+    },
+    {
+      "question_id": 3,
+      "attendee_id": 84,
+      "selected_option": 1,
+      "text_response": null
+    },
+    {
+      "question_id": 4,
+      "attendee_id": 84,
+      "selected_option": 2,
+      "text_response": null
+    },
+    {
+      "question_id": 3,
+      "attendee_id": 84,
+      "selected_option": 1,
+      "text_response": null
+    },
+    {
+      "question_id": 4,
+      "attendee_id": 84,
+      "selected_option": 4,
+      "text_response": null
+    },
+    {
+      "question_id": 1,
+      "attendee_id": 84,
+      "selected_option": 2,
+      "text_response": null
+    },
+    {
+      "question_id": 2,
+      "attendee_id": 84,
+      "selected_option": 3,
+      "text_response": null
+    },
+    {
+      "question_id": 9,
+      "attendee_id": 84,
+      "selected_option": 1,
+      "text_response": null
+    },
+    {
+      "question_id": 10,
+      "attendee_id": 84,
+      "selected_option": 4,
+      "text_response": null
+    },
+    {
+      "question_id": 5,
+      "attendee_id": 84,
+      "selected_option": 1,
+      "text_response": null
+    },
+    {
+      "question_id": 6,
+      "attendee_id": 84,
+      "selected_option": 3,
+      "text_response": null
+    },
+    {
+      "question_id": 7,
+      "attendee_id": 84,
+      "selected_option": 4,
+      "text_response": null
+    },
+    {
+      "question_id": 8,
+      "attendee_id": 84,
+      "selected_option": 2,
+      "text_response": null
+    },
+    {
+      "question_id": 15,
+      "attendee_id": 84,
+      "selected_option": null,
+      "text_response": "hdhhdnjd"
+    },
+    {
+      "question_id": 1,
+      "attendee_id": 85,
+      "selected_option": 1,
+      "text_response": null
+    },
+    {
+      "question_id": 2,
+      "attendee_id": 85,
+      "selected_option": 2,
+      "text_response": null
+    },
+    {
+      "question_id": 9,
+      "attendee_id": 85,
+      "selected_option": 4,
+      "text_response": null
+    },
+    {
+      "question_id": 10,
+      "attendee_id": 85,
+      "selected_option": 4,
+      "text_response": null
+    }
+  ],
+  "reviews": [
+    {
+      "attendee_id": 84,
+      "content": "it was a nice session djamgo",
+      "feedback_type": "quiz"
+    },
+    {
+      "attendee_id": 84,
+      "content": "i want to know more about django course",
+      "feedback_type": "review"
+    },
+    {
+      "attendee_id": 84,
+      "content": "how can i enter in this course",
+      "feedback_type": "review"
+    },
+    {
+      "attendee_id": 84,
+      "content": "was good",
+      "feedback_type": "quiz"
+    },
+    {
+      "attendee_id": 84,
+      "content": "djago class feedback",
+      "feedback_type": "quiz"
+    },
+    {
+      "attendee_id": 84,
+      "content": "python quiz",
+      "feedback_type": "quiz"
+    },
+    {
+      "attendee_id": 84,
+      "content": "its gud for us",
+      "feedback_type": "quiz"
+    },
+    {
+      "attendee_id": 85,
+      "content": "hjg",
+      "feedback_type": "quiz"
+    }
+  ],
+  "admins": [
+    {
+      "username": "admin",
+      "password": "pbkdf2_sha256$1000000$SkKueAgUkK8pTYpM8jiL3L$7ljHR9zWnh5XXYjsWRW7OoP2LSP8Lg6hK/KmAjZYCQY=",
+      "email": "admin@example.com"
+    }
+  ]
+}

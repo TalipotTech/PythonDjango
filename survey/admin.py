@@ -145,21 +145,25 @@ class ClassSessionAdmin(admin.ModelAdmin):
 # 🔹 Review admin: corrected to match your new model
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
-    readonly_fields = ('attendee', 'content', 'submitted_at')
-    list_display = ('attendee', 'content_preview', 'submitted_at', 'class_session_info')
+    readonly_fields = ('attendee', 'content', 'submitted_at', 'feedback_type')
+    list_display = ('attendee', 'attendee_email', 'content_preview', 'feedback_type', 'submitted_at', 'class_session_info')
     search_fields = ['attendee__name', 'attendee__email', 'content']
-    list_filter = ['submitted_at', 'attendee__class_session']
+    list_filter = ['submitted_at', 'attendee__class_session', 'feedback_type']
     date_hierarchy = 'submitted_at'
     list_per_page = 20
     actions = ['delete_selected']
     
     def content_preview(self, obj):
         return obj.content[:100] + '...' if len(obj.content) > 100 else obj.content
-    content_preview.short_description = 'Review Content'
+    content_preview.short_description = 'Feedback/Question Content'
     
     def class_session_info(self, obj):
         return obj.attendee.class_session.title if obj.attendee and obj.attendee.class_session else 'N/A'
     class_session_info.short_description = 'Class Session'
+    
+    def attendee_email(self, obj):
+        return obj.attendee.email if obj.attendee else 'N/A'
+    attendee_email.short_description = 'Email'
 
     def has_add_permission(self, request):
         return False
@@ -184,3 +188,8 @@ class AdminModelAdmin(admin.ModelAdmin):
 # 🔹 Clean up default admin
 admin.site.unregister(Group)
 admin.site.unregister(User)
+
+# 🔹 Customize admin site
+admin.site.site_header = 'Quiz Portal Administration'
+admin.site.site_title = 'Quiz Portal Admin'
+admin.site.index_title = 'Welcome to Quiz Portal Admin'

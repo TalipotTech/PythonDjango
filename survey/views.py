@@ -1174,8 +1174,15 @@ def admin_dashboard(request):
     # Add attended sessions and submit status to each attendee
     from .models import SessionAttendance
     for attendee in recent_attendees:
-        # Get all sessions this attendee has attended
-        attendee.attended_sessions = SessionAttendance.objects.filter(attendee=attendee).select_related('class_session')
+        # Get all sessions this attendee has attended OR submitted responses for
+        attended_via_attendance = SessionAttendance.objects.filter(attendee=attendee).values_list('class_session_id', flat=True)
+        submitted_sessions = Response.objects.filter(attendee=attendee).values_list('question__class_session_id', flat=True).distinct()
+        
+        # Combine both to get all unique sessions
+        all_session_ids = set(list(attended_via_attendance) + list(submitted_sessions))
+        
+        # Get the actual session objects
+        attendee.attended_sessions_list = ClassSession.objects.filter(id__in=all_session_ids).order_by('-start_time')
         
         # Check if they have submitted responses for their CURRENT session
         if attendee.class_session:

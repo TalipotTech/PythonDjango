@@ -76,30 +76,34 @@ class AttendeeViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         """
-        Allow anyone to register (POST)
-        Require authentication for list/retrieve
-        Require admin for delete
+        Allow anyone to register (POST) and view their own record (GET by ID)
+        Require admin for list and delete
         """
-        if self.action == 'create':
+        if self.action in ['create', 'retrieve']:
             return [AllowAny()]
         elif self.action in ['destroy', 'list']:
             return [IsAdminUser()]
-        return [IsAuthenticated()]
+        # Allow anyone to call custom actions like submit_quiz
+        elif self.action in ['submit_quiz', 'my_registrations']:
+            return [AllowAny()]
+        return [IsAdminUser()]
     
     def get_serializer_class(self):
         if self.action == 'create':
             return AttendeeRegistrationSerializer
         return AttendeeSerializer
     
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def my_registrations(self, request):
         """Get registrations for current user's email"""
-        email = request.query_params.get('email', request.user.email)
+        email = request.query_params.get('email')
+        if not email:
+            return Response({'error': 'Email parameter is required'}, status=400)
         attendees = self.queryset.filter(email=email)
         serializer = self.get_serializer(attendees, many=True)
         return Response(serializer.data)
     
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['post'], permission_classes=[AllowAny])
     def submit_quiz(self, request, pk=None):
         """Mark attendee as having submitted their quiz"""
         attendee = self.get_object()
@@ -227,11 +231,11 @@ class QuestionViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         """
-        Allow authenticated users to view questions
+        Allow anyone to view questions (students need them for quiz)
         Require admin for create/update/delete
         """
         if self.action in ['list', 'retrieve']:
-            return [IsAuthenticated()]
+            return [AllowAny()]
         return [IsAdminUser()]
 
 
@@ -241,39 +245,63 @@ class ResponseViewSet(viewsets.ModelViewSet):
     """
     queryset = QuizResponse.objects.all().select_related('attendee', 'question')
     serializer_class = ResponseSerializer
-    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filter_backends = [DjangoFilterBackend]
     filterset_fields = ['attendee', 'question']
-    ordering_fields = ['created_at']
-    ordering = ['-created_at']
-    permission_classes = [IsAuthenticated]
+    # No ordering - Response model doesn't have created_at or timestamp fields
+    
+    def get_permissions(self):
+        """
+        Allow anyone to create and view responses (students submitting and viewing quiz)
+        Admin can see all responses
+        """
+        if self.action in ['create', 'list', 'retrieve']:
+            return [AllowAny()]
+        return [IsAdminUser()]
     
     def get_queryset(self):
         """
-        Non-staff users can only see their own responses
+        Filter responses based on attendee parameter
+        Admin can see all, students see only their own
         """
         queryset = super().get_queryset()
         # Skip filtering during Swagger schema generation
         if getattr(self, 'swagger_fake_view', False):
             return queryset
-        if not self.request.user.is_staff:
-            # Filter by email if attendee
-            email = self.request.query_params.get('email', self.request.user.email if self.request.user.is_authenticated else None)
-            if email:
-                queryset = queryset.filter(attendee__email=email)
+        
+        # Check if user is authenticated admin
+        if self.request.user.is_authenticated and self.request.user.is_staff:
+            return queryset
+        
+        # For students, filter by attendee ID from query params
+        attendee_id = self.request.query_params.get('attendee')
+        if attendee_id:
+            queryset = queryset.filter(attendee_id=attendee_id)
+        else:
+            # If no attendee filter, return empty queryset for non-admin
+            queryset = queryset.none()
+        
         return queryset
     
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def my_responses(self, request):
-        """Get responses for current user"""
-        email = request.query_params.get('email', request.user.email)
-        responses = self.queryset.filter(attendee__email=email)
+        """Get responses for current user by email or attendee ID"""
+        attendee_id = request.query_params.get('attendee')
+        email = request.query_params.get('email')
+        
+        if attendee_id:
+            responses = self.queryset.filter(attendee_id=attendee_id)
+        elif email:
+            responses = self.queryset.filter(attendee__email=email)
+        else:
+            return Response({'error': 'Please provide attendee ID or email'}, status=400)
+        
         serializer = self.get_serializer(responses, many=True)
         return Response(serializer.data)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """
-    API endpoint for Reviews/Feedback - No authentication required for creating feedback
+    API endpoint for Reviews/Feedback
     """
     queryset = Review.objects.all().select_related('attendee')
     serializer_class = ReviewSerializer
@@ -282,7 +310,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
     search_fields = ['content']
     ordering_fields = ['submitted_at']
     ordering = ['-submitted_at']
-    authentication_classes = []  # No authentication required
     
     def get_permissions(self):
         """
@@ -291,8 +318,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
         """
         if self.action == 'create':
             return [AllowAny()]  # Anyone can submit feedback
-        elif self.action in ['list', 'retrieve']:
-            return [IsAdminUser()]  # Only admin can view feedback
+        elif self.action in ['list', 'retrieve', 'destroy']:
+            return [IsAdminUser()]  # Only admin can view/delete feedback
         return [IsAdminUser()]
     
     def get_queryset(self):
@@ -581,7 +608,7 @@ def dashboard_statistics(request):
     ).data
     
     recent_reviews = ReviewSerializer(
-        Review.objects.order_by('-created_at')[:5],
+        Review.objects.order_by('-submitted_at')[:5],
         many=True
     ).data
     
