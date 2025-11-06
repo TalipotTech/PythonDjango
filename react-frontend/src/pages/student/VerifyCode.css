@@ -1,0 +1,116 @@
+.verify-code-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 40px 20px;
+}
+
+.verify-code-card {
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.4s ease-out;
+}
+
+.icon-circle {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  color: white;
+}
+
+.success-icon {
+  margin: 0 auto;
+}
+
+.code-input {
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  border: 3px solid #667eea;
+  border-radius: 12px;
+}
+
+.code-input:focus {
+  border-color: #764ba2;
+  box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+}
+
+.verified-session-info {
+  background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 20px;
+}
+
+.verified-session-info h5 {
+  color: #667eea;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.user-type-selection {
+  padding-top: 20px;
+  border-top: 2px solid #f0f0f0;
+}
+
+.user-type-selection .btn {
+  border-radius: 12px;
+  border-width: 2px;
+  transition: all 0.3s ease;
+}
+
+.user-type-selection .btn-outline-primary:hover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.user-type-selection .btn-outline-success:hover {
+  background: linear-gradient(135deg, #06d6a0 0%, #00b894 100%);
+  border-color: #06d6a0;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(6, 214, 160, 0.3);
+}
+
+.btn-link {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.btn-link:hover {
+  color: #f0f0f0;
+  text-decoration: underline;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .verify-code-card {
+    padding: 30px 20px;
+  }
+
+  .user-type-selection .col-6 {
+    width: 100%;
+  }
+
+  .user-type-selection .btn {
+    margin-bottom: 10px;
+  }
+}

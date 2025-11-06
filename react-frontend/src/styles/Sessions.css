@@ -1,0 +1,221 @@
+/* Sessions.css */
+
+.filter-tabs {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.filter-tabs button {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid var(--border);
+  background: white;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.filter-tabs button:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.filter-tabs .tab-active {
+  background-color: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.sessions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.session-card {
+  background: white;
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.session-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.session-header {
+  margin-bottom: var(--spacing-md);
+}
+
+.session-card h3 {
+  color: var(--dark);
+  margin-bottom: var(--spacing-sm);
+}
+
+.session-teacher {
+  color: var(--text-light);
+  margin-bottom: var(--spacing-sm);
+}
+
+.session-code {
+  margin: var(--spacing-sm) 0;
+}
+
+.session-code code {
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  background-color: #f3f4f6;
+  border-radius: var(--radius-sm);
+}
+
+.session-time {
+  margin: var(--spacing-sm) 0;
+}
+
+.time-remaining {
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+.session-attendees {
+  color: var(--text-light);
+  margin: var(--spacing-sm) 0;
+}
+
+.session-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+.session-actions-center {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--spacing-lg);
+}
+
+/* Session Detail */
+
+.session-detail-card {
+  background: white;
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.session-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.session-detail-header h1 {
+  font-size: 2rem;
+  color: var(--dark);
+  margin-bottom: var(--spacing-xs);
+}
+
+.session-detail-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.info-item strong {
+  display: block;
+  color: var(--text-light);
+  margin-bottom: var(--spacing-xs);
+  font-size: 0.875rem;
+}
+
+.info-item p {
+  color: var(--dark);
+  font-size: 1rem;
+}
+
+.session-code-large {
+  font-size: 1.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--light);
+  border-radius: var(--radius-md);
+  display: inline-block;
+}
+
+/* Questions Section */
+
+.questions-section {
+  margin-top: var(--spacing-xl);
+}
+
+.questions-section h2 {
+  margin-bottom: var(--spacing-lg);
+}
+
+.questions-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.question-card {
+  background: white;
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border-left: 4px solid var(--primary);
+}
+
+.question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.question-number {
+  background-color: var(--primary);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+}
+
+.question-type-badge {
+  font-size: 0.875rem;
+  color: var(--text-light);
+}
+
+.question-text {
+  font-size: 1.125rem;
+  color: var(--dark);
+  margin-bottom: var(--spacing-md);
+}
+
+.question-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.option-preview {
+  padding: var(--spacing-sm);
+  background-color: var(--light);
+  border-radius: var(--radius-md);
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.option-label {
+  font-weight: 600;
+  color: var(--primary);
+}

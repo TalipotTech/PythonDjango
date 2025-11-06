@@ -1,0 +1,241 @@
+.session-home-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px 0;
+}
+
+.session-header h2 {
+  color: white;
+  font-weight: bold;
+}
+
+.session-header .text-muted {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.status-card {
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.4s ease-out;
+}
+
+.status-icon {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  color: white;
+}
+
+.status-icon.waiting {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.status-icon.active {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.status-icon.expired {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.countdown-display {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #667eea;
+  font-family: 'Courier New', monospace;
+  margin: 20px 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+  border-radius: 12px;
+}
+
+.time-remaining-display {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #4facfe;
+  margin: 20px 0;
+  padding: 15px;
+  background: linear-gradient(135deg, #4facfe15 0%, #00f2fe15 100%);
+  border-radius: 12px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.action-buttons .btn {
+  min-width: 180px;
+  padding: 14px 28px;
+  font-weight: 600;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.action-buttons .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.completed-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: white;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.progress-panel {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.4s ease-out 0.1s both;
+}
+
+.progress-panel h5 {
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 25px;
+}
+
+.progress-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+  background: #e9ecef;
+  transform: translateX(5px);
+}
+
+.stat-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.stat-icon.success {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.stat-icon.warning {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.stat-info {
+  flex: 1;
+  text-align: left;
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: -5px;
+}
+
+.progress-bar-container {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.progress-bar-container .progress {
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #e9ecef;
+}
+
+.progress-bar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transition: width 0.5s ease;
+}
+
+.last-activity {
+  padding-top: 15px;
+  border-top: 1px solid #e9ecef;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .countdown-display {
+    font-size: 2.5rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .action-buttons .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .status-card {
+    padding: 30px 20px;
+  }
+
+  .countdown-display {
+    font-size: 2rem;
+  }
+
+  .status-icon {
+    width: 80px;
+    height: 80px;
+  }
+
+  .progress-panel {
+    padding: 20px;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+}

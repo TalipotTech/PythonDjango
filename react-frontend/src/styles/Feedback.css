@@ -1,0 +1,10 @@
+/* Feedback.css */
+
+.feedback-card {
+  background: white;
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  max-width: 700px;
+  margin: var(--spacing-lg) auto;
+}

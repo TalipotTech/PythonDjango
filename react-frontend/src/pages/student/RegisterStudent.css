@@ -1,0 +1,129 @@
+.register-student-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 40px 20px;
+}
+
+.register-card {
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.4s ease-out;
+}
+
+.icon-circle {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  color: white;
+}
+
+.session-info {
+  background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+  padding: 15px;
+  border-radius: 12px;
+  margin-top: 15px;
+}
+
+.session-info h5 {
+  color: #667eea;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.form-label {
+  font-weight: 500;
+  color: #333;
+}
+
+.form-control {
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  padding: 12px;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.15);
+}
+
+.input-group .btn-outline-secondary {
+  border-color: #ddd;
+  color: #666;
+}
+
+.input-group .btn-outline-secondary:hover {
+  background-color: #667eea;
+  border-color: #667eea;
+  color: white;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 8px;
+  padding: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  transform: none;
+}
+
+.btn-link {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.btn-link:hover {
+  color: #f0f0f0;
+  text-decoration: underline;
+}
+
+.register-card .btn-link {
+  color: #667eea;
+  font-weight: 600;
+}
+
+.register-card .btn-link:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .register-card {
+    padding: 30px 20px;
+  }
+
+  .icon-circle {
+    width: 60px;
+    height: 60px;
+  }
+}
